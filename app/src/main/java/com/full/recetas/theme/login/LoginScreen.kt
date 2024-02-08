@@ -143,8 +143,8 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .clip(shape = RoundedCornerShape(71.dp))
                 .background(
                     brush = Brush.linearGradient(
-                        0f to Color(0xff3ed8f8),
-                        1f to Color(0xff1976d2),
+                        0f to Color(context.getColor(R.color.selected)),
+                        1f to Color(context.getColor(R.color.secondary)),
                         start = Offset(554f, -124.5f),
                         end = Offset(32.5f, 385f)
                     )
@@ -183,7 +183,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                         modifier = Modifier
                             .size(75.dp)
                             .align(alignment = Alignment.Center),
-                        tint = Color(0xff1976d2)
+                        tint = Color(context.getColor(R.color.secondary))
                     )
                 }
             }
@@ -203,9 +203,9 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
             },
             shape = RoundedCornerShape(5.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xff1976d2),
+                containerColor = Color(context.getColor(R.color.primaryDescendant)),
                 contentColor = Color.White,
-                disabledContainerColor = Color(0xFFA0CFFD),
+                disabledContainerColor = Color(context.getColor(R.color.primary)),
             ),
             enabled = enableLogin
         ) {
@@ -301,7 +301,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
 
         Text(
             text = "¿Has olvidado tu contraseña?",
-            color = Color(0xff26a69a),
+            color = Color(context.getColor(R.color.secondary)),
             textAlign = TextAlign.Center,
             style = TextStyle(
                 fontSize = 11.sp),
@@ -348,7 +348,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     .requiredWidth(width = 263.dp)
                     .requiredHeight(height = 47.dp)
                     .clip(shape = RoundedCornerShape(3.dp))
-                    .background(color = Color(0xff1976d2)))
+                    .background(color = Color(context.getColor(R.color.primaryDescendant))))
             Text(
                 text = "INICIAR SESION CON GOOGLE",
                 color = Color.White,

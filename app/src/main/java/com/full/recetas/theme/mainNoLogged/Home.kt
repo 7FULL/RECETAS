@@ -64,7 +64,7 @@ import com.full.recetas.models.Recipe
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainNoLogged(modifier: Modifier = Modifier, vm: HomeViewModel) {
+fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = false) {
     val searchBarText: String by vm.searchBarText.observeAsState("")
     var searchBarActive by rememberSaveable { mutableStateOf(false) }
 
@@ -247,7 +247,7 @@ fun MainNoLogged(modifier: Modifier = Modifier, vm: HomeViewModel) {
                     .padding(
                         start = 11.dp, end = 11.dp
                     )
-                    .height(402.dp)
+                    .height(if (!loggedIn) 402.dp else 450.dp)
                 ){
                     for (i in 0..5){
                         item{
@@ -381,50 +381,52 @@ fun MainNoLogged(modifier: Modifier = Modifier, vm: HomeViewModel) {
             }
 
             //Mensaje de login
-            Row{
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp)
-                    .background(color = Color(context.getColor(R.color.secondary)))
-                ){
-                    Row(modifier = Modifier.align(Alignment.Center)){
-                        Column{
-                            Box(modifier = Modifier.fillMaxHeight()){
-                                Text(
-                                    text = "¿Todavia no tienes cuenta? Unete!",
-                                    style = TextStyle(
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        textAlign = TextAlign.Center
-                                    ),
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        }
-                        Column{
-                            Box(modifier = Modifier.padding(start = 15.dp, top=5.dp, bottom = 5.dp)){
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color.White,
-                                            shape = RoundedCornerShape(5.dp)
-                                        )
-                                        .height(22.dp)
-                                )
-                                {
+            if(!loggedIn){
+                Row{
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .background(color = Color(context.getColor(R.color.secondary)))
+                    ){
+                        Row(modifier = Modifier.align(Alignment.Center)){
+                            Column{
+                                Box(modifier = Modifier.fillMaxHeight()){
                                     Text(
-                                        text = "Iniciar sesion",
-                                        color = Color(context.getColor(R.color.secondary)),
+                                        text = "¿Todavia no tienes cuenta? Unete!",
                                         style = TextStyle(
-                                            fontSize = 12.sp,
+                                            fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             textAlign = TextAlign.Center
                                         ),
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .padding(start = 5.dp, end = 5.dp)
+                                        color = Color.White,
+                                        modifier = Modifier.align(Alignment.Center)
                                     )
+                                }
+                            }
+                            Column{
+                                Box(modifier = Modifier.padding(start = 15.dp, top=5.dp, bottom = 5.dp)){
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color.White,
+                                                shape = RoundedCornerShape(5.dp)
+                                            )
+                                            .height(22.dp)
+                                    )
+                                    {
+                                        Text(
+                                            text = "Iniciar sesion",
+                                            color = Color(context.getColor(R.color.secondary)),
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                textAlign = TextAlign.Center
+                                            ),
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .padding(start = 5.dp, end = 5.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -438,7 +440,7 @@ fun MainNoLogged(modifier: Modifier = Modifier, vm: HomeViewModel) {
 @Preview
 @Composable
 fun MainNoLoggedPreview() {
-    MainNoLogged(vm = HomeViewModel())
+    Home(vm = HomeViewModel())
 }
 
 

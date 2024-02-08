@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PunchClock
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
@@ -76,7 +75,7 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
                                 .align(alignment = Alignment.CenterStart)
                                 .padding(start = 20.dp)
                                 .requiredSize(size = 50.dp)
-                                .clickable { NavigationManager.instance!!.navigate(AppScreens.MainNoLogged.route) }
+                                .clickable { NavigationManager.instance!!.navigate(AppScreens.HomeNoLogged.route) }
                         )
 
                         Text(
@@ -234,7 +233,7 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
                                 )
                             )
 
-                            LazyColumn(){
+                            LazyColumn(modifier = Modifier.height(93.dp)){
                                 items(recipe.ingredients.size) { index ->
                                     Text(
                                         text = recipe.ingredients[index],

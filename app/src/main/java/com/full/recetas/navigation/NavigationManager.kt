@@ -17,7 +17,7 @@ import com.full.recetas.ui.theme.login.checkToken.NewPassword
 import com.full.recetas.ui.theme.login.checkToken.NewPasswordViewModel
 import com.full.recetas.ui.theme.login.forgotPassword.ForgotPassword
 import com.full.recetas.ui.theme.login.forgotPassword.ForgotPasswordViewModel
-import com.full.recetas.theme.mainNoLogged.MainNoLogged
+import com.full.recetas.theme.mainNoLogged.Home
 import com.full.recetas.theme.mainNoLogged.HomeViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
@@ -29,7 +29,7 @@ object NavigationManager{
 
         if (instance == null) instance = rememberNavController()
 
-        NavHost(navController = instance!!, startDestination = AppScreens.Recipe.route+"?id=1")
+        NavHost(navController = instance!!, startDestination = AppScreens.HomeLogged.route+"?id=1")
         {
             composable(AppScreens.Login.route) {
                 Login(loginViewModel = LoginViewModel())
@@ -47,8 +47,12 @@ object NavigationManager{
                 NewPassword(newPasswordViewModel = NewPasswordViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
-            composable(AppScreens.MainNoLogged.route) {
-                MainNoLogged(vm = HomeViewModel())
+            composable(AppScreens.HomeNoLogged.route) {
+                Home(vm = HomeViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.HomeLogged.route) {
+                Home(vm = HomeViewModel(), loggedIn = true)
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
             composable(

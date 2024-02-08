@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.full.recetas.R
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.theme.login.Input
 
@@ -48,6 +50,8 @@ fun NewPassword(modifier: Modifier = Modifier, newPasswordViewModel: NewPassword
 
     //Pillamos el teclado simplemente para poder ocultarlo
     val keyboard = LocalSoftwareKeyboardController.current
+
+    val context = LocalContext.current
 
     Box(
         modifier = modifier
@@ -64,8 +68,8 @@ fun NewPassword(modifier: Modifier = Modifier, newPasswordViewModel: NewPassword
                 .clip(shape = RoundedCornerShape(71.dp))
                 .background(
                     brush = Brush.linearGradient(
-                        0f to Color(0xff3ed8f8),
-                        1f to Color(0xff1976d2),
+                        0f to Color(context.getColor(R.color.selected)),
+                        1f to Color(context.getColor(R.color.secondary)),
                         start = Offset(554f, -124.5f),
                         end = Offset(32.5f, 385f)
                     )
@@ -103,7 +107,7 @@ fun NewPassword(modifier: Modifier = Modifier, newPasswordViewModel: NewPassword
                         Icons.Default.Security, contentDescription = "Login",
                         modifier = Modifier.size(75.dp)
                             .align(alignment = Alignment.Center),
-                        tint = Color(0xff1976d2)
+                        tint = Color(context.getColor(R.color.secondary))
                     )
                 }
             }
@@ -123,9 +127,9 @@ fun NewPassword(modifier: Modifier = Modifier, newPasswordViewModel: NewPassword
             },
             shape = RoundedCornerShape(5.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xff1976d2),
+                containerColor = Color(context.getColor(R.color.primaryDescendant)),
                 contentColor = Color.White,
-                disabledContainerColor = Color(0xFFA0CFFD),
+                disabledContainerColor = Color(context.getColor(R.color.primary)),
             ),
             enabled = enableCheck
         ) {
@@ -196,7 +200,7 @@ fun NewPassword(modifier: Modifier = Modifier, newPasswordViewModel: NewPassword
             },
             shape = RoundedCornerShape(5.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFEB244B),
+                containerColor = Color(context.getColor(R.color.primaryDescendant)),
                 contentColor = Color.White,
                 disabledContainerColor = Color(0xFFA0CFFD),
             ),

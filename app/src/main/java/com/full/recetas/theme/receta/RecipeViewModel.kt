@@ -16,7 +16,7 @@ class RecipeViewModel {
             30,
             "Esto es una descirpcion",
             listOf("Paso 1", "Paso 2", "Paso 3"),
-            listOf("Macarrones", "Chorizo", "Tomate"),
+            listOf("Macarrones", "Chorizo", "Tomate", "Cebolla", "Pimiento", "Aceite", "Sal", "Pimienta"),
             5324,
             listOf("Pasta", "Cena", "Horno"),
         )
