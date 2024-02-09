@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 //https://developer.android.com/studio/run/emulator-networking
 //Tenemos que poner 10.0.2.2 en vez de localhost porque estamos en un emulador
-private val BASE_URL = "http://10.0.2.2:8080/"
+private val BASE_URL = "http://10.0.2.2:3000/"
 
 private val httpClient = OkHttpClient.Builder().addInterceptor(
     BasicAuthInterceptor("user", "user")).build()
@@ -34,6 +34,9 @@ object API {
     private val _trendingRecipes = MutableLiveData<Array<Recipe>>()
     val trendingRecipes: LiveData<Array<Recipe>> = _trendingRecipes
 
+    private val _allRecipes = MutableLiveData<Array<Recipe>>()
+    val allRecipes: LiveData<Array<Recipe>> = _allRecipes
+
     var mainActivity: MainActivity? = null
 
     val isLogged: Boolean
@@ -46,8 +49,12 @@ object API {
         _user.value = employee
     }
 
-    fun setRecipes(recipes: Array<Recipe>) {
+    fun setTrendingRecipes(recipes: Array<Recipe>) {
         _trendingRecipes.value = recipes
+    }
+
+    fun setAllRecipes(recipes: Array<Recipe>) {
+        _allRecipes.value = recipes
     }
 
     fun logout() {

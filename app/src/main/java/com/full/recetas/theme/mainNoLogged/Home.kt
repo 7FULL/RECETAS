@@ -1,5 +1,6 @@
 package com.full.recetas.theme.mainNoLogged
 
+import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,17 +59,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.R
 import com.full.recetas.BottomBar
 import com.full.recetas.models.Recipe
+import com.google.android.play.integrity.internal.c
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalGlideComposeApi::class
+)
 @Composable
 fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = false) {
     val searchBarText: String by vm.searchBarText.observeAsState("")
     var searchBarActive by rememberSaveable { mutableStateOf(false) }
 
-    val searchRecipes: MutableList<Recipe> by vm.auxRecipes.observeAsState(mutableListOf())
+    val auxRecipes: MutableList<Recipe> by vm.auxRecipes.observeAsState(mutableListOf())
+    val trendingRecipes: Array<Recipe> by vm.trendingRecipes.observeAsState(emptyArray())
 
     val context = LocalContext.current
 
@@ -126,12 +135,12 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                 )
                             },
                         ) {
-                            if (searchRecipes != null){
-                                repeat(searchRecipes.size) { idx ->
-                                    val resultText = searchRecipes[idx].name    ?: "Esta factura no tiene nombre"
+                            if (auxRecipes != null){
+                                repeat(auxRecipes.size) { idx ->
+                                    val resultText = auxRecipes[idx].name    ?: "Esta factura no tiene nombre"
                                     ListItem(
                                         headlineContent = { Text(resultText) },
-                                        supportingContent = { Text(searchRecipes[idx].description) },
+                                        supportingContent = { Text(auxRecipes[idx].description) },
                                         leadingContent = { Icon(Icons.Filled.AttachMoney, contentDescription = null) },
                                         modifier = Modifier
                                             .clickable {
@@ -159,7 +168,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
 
             //Titulo recetas de la semamna
             Row {
-                Text(text = "Recetas de la semana",
+                Text(text = "Recetas destacadas",
                     modifier = Modifier.padding(start = 15.dp, top = 5.dp),
                     style = TextStyle(
                         fontSize = 20.sp,
@@ -172,7 +181,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
             Row {
                 LazyRow(modifier = Modifier.padding(
                     start= 11.dp, top= 20.dp, bottom = 20.dp)){
-                    for (i in 0..5){
+                    for (receta in trendingRecipes){
                         item{
                             Box(modifier = Modifier.padding(end = 20.dp)){
                                 Column(
@@ -183,17 +192,17 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                         .background(color = Color(context.getColor(R.color.unselected)))
                                 ) {
                                     Row{
-                                        Image(
-                                            painter = painterResource(id = R.drawable.receta_default),
+                                        GlideImage(model = receta.image,
                                             contentDescription = "Recipe",
                                             contentScale = ContentScale.Crop,
+                                            loading = placeholder(R.drawable.loading),
                                             modifier = Modifier
                                                 .height(74.dp)
                                         )
                                     }
                                     Row(modifier = Modifier.fillMaxSize()){
                                         Text(
-                                            text = "Receta $i",
+                                            text = receta.name,
                                             modifier = Modifier
                                                 .align(Alignment.CenterVertically)
                                                 .fillMaxWidth(),
@@ -350,7 +359,11 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                                     )
                                                                     .width(89.dp)
                                                                     .height(23.dp)
-                                                                    .background(color = Color(context.getColor(R.color.primaryDescendant)))
+                                                                    .background(
+                                                                        color = Color(
+                                                                            context.getColor(R.color.primaryDescendant)
+                                                                        )
+                                                                    )
                                                                 ){
                                                                     Text(text = "Categoria $i",
                                                                         color = Color.White,

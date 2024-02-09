@@ -51,6 +51,9 @@ android {
 }
 
 dependencies {
+    //Glide para las imagenes
+    implementation ("com.github.bumptech.glide:compose:1.0.0-beta01")
+
     //WorkRunTime
     implementation("androidx.work:work-runtime-ktx:2.8.1")
 

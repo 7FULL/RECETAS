@@ -10,7 +10,7 @@ class RecipeViewModel {
     @Composable
     fun getrecipe(id: String): Recipe {
         return Recipe("1", "Macarrones con chorizo",
-            User("1", "JuanManolo24", "", "Juan", "Manolo", "email@gmail.com", "678 04 15 77", R.drawable.logogoogle_removebg.toString(), listOf(), listOf()),
+            User("1", "JuanManolo24", "", "Juan", "Manolo", "email@gmail.com", "678 04 15 77", R.drawable.logogoogle_removebg.toString(), listOf(), listOf(), listOf(), ""),
             R.drawable.receta_default.toString(),
             4,
             30,

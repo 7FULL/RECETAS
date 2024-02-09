@@ -20,6 +20,9 @@ interface ApiService {
     @GET("api/recipes/trending")
     suspend fun getTrendingRecipes(): Response<DataResponse<Array<Recipe>>>
 
+    @GET("api/recipes")
+    suspend fun getRecipes(): Response<DataResponse<Array<Recipe>>>
+
     @GET("api/user")
     suspend fun getUser(@Query("email") email: String): Response<DataResponse<User>>
 
