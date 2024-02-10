@@ -6,6 +6,6 @@ sealed class AppScreens(val route: String) {
     object CheckToken : AppScreens("checkToken")
     object NewPassword : AppScreens("newPassword")
     object HomeNoLogged : AppScreens("mainNoLogged")
-    object HomeLogged : AppScreens("mainNoLogged")
+    object HomeLogged : AppScreens("mainLogged")
     object Recipe : AppScreens("recipe")
 }

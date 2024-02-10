@@ -1,5 +1,6 @@
 package com.full.recetas.theme.receta
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.filled.Timer
@@ -32,29 +34,38 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.BottomBar
 import com.full.recetas.R
-import com.full.recetas.navigation.AppScreens
+import com.full.recetas.models.Recipe
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun Recipe(productoViewModel: RecipeViewModel, id: String) {
+fun Recipe(vm: RecipeViewModel) {
     val context = LocalContext.current
-    val recipe = productoViewModel.getrecipe(id)
+    val recipe: Recipe by vm.recipeData.observeAsState(Recipe())
     val likes = recipe.likes
+
+    val isLikedLD: Boolean by vm.isLiked.observeAsState(false)
+
+    Log.i("Recipe", "isLiked: $isLikedLD")
 
     //If likes is greater than 1000, we divide it by 1000 and add a "K" at the end
     val likesText = if (likes > 1000) "${likes / 1000}K" else likes.toString()
@@ -75,8 +86,10 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
                                 .align(alignment = Alignment.CenterStart)
                                 .padding(start = 20.dp)
                                 .requiredSize(size = 50.dp)
-                                .clickable { NavigationManager.instance!!.navigate(AppScreens.HomeNoLogged.route) }
+                                .clickable { NavigationManager.instance!!.popBackStack() }
                         )
+
+                        Text(text = isLikedLD.toString())
 
                         Text(
                             text = recipe.name,
@@ -99,43 +112,62 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
 
         Column(modifier = Modifier.padding(innerPadding)){
             Box{
-                Image(
+                GlideImage(model = recipe.image,
+                    contentDescription = recipe.name,
                     contentScale = ContentScale.Crop,
-                    painter = painterResource(id = recipe.image.toInt()),
-                    contentDescription = "Macarrones con chorizo",
+                    loading = placeholder(R.drawable.loading),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(300.dp)
                 )
 
-                Box(
-                    modifier = Modifier
-                        .offset(y = (250).dp)
-                ) {
-                    Row(modifier = Modifier
-                        .background(color = Color(0, 0, 0, 100))
-                        .width(100.dp)
-                        .height(50.dp)){
-                        Column{
-                            Icon(
-                                Icons.Default.FavoriteBorder, contentDescription = "Likes",
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .size(40.dp),
-                                tint = Color.White,
-                            )
-                        }
-                        Column{
-                            Box(modifier = Modifier.fillMaxSize()){
-                                Text(
-                                    text = likesText,
-                                    modifier = Modifier.align(alignment = Alignment.Center),
-                                    style = TextStyle(
-                                        color = Color.White,
-                                        fontSize = 24.sp,
-                                        textAlign = TextAlign.Center
+                if (API.isLogged){
+                    Box(
+                        modifier = Modifier
+                            .offset(y = (250).dp)
+                    ) {
+                        Row(modifier = Modifier
+                            .background(color = Color(0, 0, 0, 100))
+                            .width(100.dp)
+                            .height(50.dp)){
+                            Column {
+                                //If we have it in our likes, we show the filled heart
+                                if (isLikedLD) {
+                                    Icon(
+                                        Icons.Default.Favorite, contentDescription = "Likes",
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .size(40.dp)
+                                            .clickable {
+                                                vm.unlikeRecipe(recipe._id)
+                                            },
+                                        tint = Color.Red,
                                     )
-                                )
+                                }else{
+                                    Icon(
+                                        Icons.Default.FavoriteBorder, contentDescription = "Likes",
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .size(40.dp)
+                                            .clickable {
+                                                vm.likeRecipe(recipe._id)
+                                            },
+                                        tint = Color.White,
+                                    )
+                                }
+                            }
+                            Column{
+                                Box(modifier = Modifier.fillMaxSize()){
+                                    Text(
+                                        text = likesText,
+                                        modifier = Modifier.align(alignment = Alignment.Center),
+                                        style = TextStyle(
+                                            color = Color.White,
+                                            fontSize = 24.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
@@ -152,15 +184,17 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
                         ) {
                             //Publisher
                             Row{
-                                Image(
-                                    painter = painterResource(id = recipe.publisher.image.toInt()),
+                                GlideImage(model = recipe.publisher.image,
                                     contentDescription = "Publisher",
+                                    contentScale = ContentScale.Crop,
+                                    loading = placeholder(R.drawable.loading),
                                     modifier = Modifier
                                         .size(45.dp)
                                         .clip(shape = RoundedCornerShape(25.dp))
                                         .align(alignment = Alignment.CenterVertically)
                                         .padding(start = 10.dp)
                                 )
+
                                 Text(
                                     text = recipe.publisher.username,
                                     style = TextStyle(
@@ -169,7 +203,8 @@ fun Recipe(productoViewModel: RecipeViewModel, id: String) {
                                         fontSize = 24.sp,
                                         textAlign = TextAlign.Center
                                     ),
-                                    modifier = Modifier.padding(start = 10.dp)
+                                    modifier = Modifier
+                                        .padding(start = 10.dp)
                                         .align(alignment = Alignment.CenterVertically)
                                         .width(175.dp)
                                 )

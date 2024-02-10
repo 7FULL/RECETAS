@@ -6,6 +6,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ApiService {
@@ -37,4 +38,13 @@ interface ApiService {
 
     @POST("api/user/forgotPassword")
     suspend fun forgotPassword(@Body email: String): Response<DataResponse<String>>
+
+    @GET("api/recipe")
+    suspend fun getRecipe(@Query("id") id: String): Response<DataResponse<Recipe>>
+
+    @PUT("api/recipe/like")
+    suspend fun likeRecipe(@Body like: Map<String, String>): Response<DataResponse<Recipe>>
+
+    @PUT("api/recipe/unlike")
+    suspend fun unlikeRecipe(@Body like: Map<String, String>): Response<DataResponse<Recipe>>
 }

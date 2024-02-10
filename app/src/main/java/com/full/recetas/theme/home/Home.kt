@@ -1,6 +1,6 @@
-package com.full.recetas.theme.mainNoLogged
+package com.full.recetas.theme.home
 
-import android.widget.ImageView
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
@@ -59,14 +61,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.R
 import com.full.recetas.BottomBar
 import com.full.recetas.models.Recipe
-import com.google.android.play.integrity.internal.c
+import com.full.recetas.navigation.AppScreens
+import com.full.recetas.navigation.NavigationManager
+import com.full.recetas.network.API
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class,
     ExperimentalGlideComposeApi::class
@@ -98,6 +101,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                 .align(alignment = Alignment.CenterStart)
                                 .padding(start = 20.dp)
                                 .requiredSize(size = 50.dp)
+                                .clickable { vm.load() }
                         )
                     }
                 }
@@ -183,7 +187,15 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                     start= 11.dp, top= 20.dp, bottom = 20.dp)){
                     for (receta in trendingRecipes){
                         item{
-                            Box(modifier = Modifier.padding(end = 20.dp)){
+                            var isLiked = false
+
+                            if(API.User.value != null){
+                                isLiked = API.User.value!!.likes.contains(receta._id)
+                            }
+
+                            Box(modifier = Modifier.padding(end = 20.dp)
+                                .clickable { NavigationManager.instance?.navigate("recipe?id=${receta._id}&isLiked=$isLiked") }
+                            ){
                                 Column(
                                     modifier = Modifier
                                         .requiredSize(size = 120.dp)
@@ -215,7 +227,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                     }
                                 }
                             }
-                            }
+                        }
                     }
                 }
             }
@@ -258,13 +270,20 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                     )
                     .height(if (!loggedIn) 402.dp else 450.dp)
                 ){
-                    for (i in 0..5){
+                    for (receta in auxRecipes){
                         item{
+                            var isLiked: Boolean = false
+
+                            if(API.User.value != null){
+                                isLiked = API.User.value!!.likes.contains(receta._id)
+                            }
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(120.dp)
                                     .padding(bottom = 11.dp)
+                                    .clickable { NavigationManager.instance?.navigate("recipe?id=${receta._id}") }
                             ) {
                                 Row{
                                     Column{
@@ -279,10 +298,10 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                     )
                                                 )
                                                 .background(color = Color(context.getColor(R.color.primary)))){
-                                            Image(
-                                                painter = painterResource(id = R.drawable.receta_default),
+                                            GlideImage(model = receta.image,
                                                 contentDescription = "Recipe",
                                                 contentScale = ContentScale.Crop,
+                                                loading = placeholder(R.drawable.loading),
                                                 modifier = Modifier
                                                     .fillMaxSize()
                                                     .clip(
@@ -293,15 +312,33 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                     )
                                                     .background(color = Color(context.getColor(R.color.primary)))
                                             )
-                                            Image(
-                                                Icons.Default.FavoriteBorder,
-                                                contentDescription = "favorite",
-                                                colorFilter = ColorFilter.tint(Color.White),
-                                                modifier = Modifier
-                                                    .align(alignment = Alignment.TopStart)
-                                                    .requiredSize(size = 35.dp)
-                                                    .padding(5.dp)
-                                            )
+                                            if (API.isLogged){
+                                                if (isLiked) {
+                                                    Icon(
+                                                        Icons.Default.Favorite, contentDescription = "Likes",
+                                                        modifier = Modifier
+                                                            .align(alignment = Alignment.TopStart)
+                                                            .requiredSize(size = 35.dp)
+                                                            .padding(5.dp)
+                                                            .clickable {
+                                                                vm.unlikeRecipe(receta._id)
+                                                            },
+                                                        tint = Color.Red,
+                                                    )
+                                                }else{
+                                                    Icon(
+                                                        Icons.Default.FavoriteBorder, contentDescription = "Likes",
+                                                        modifier = Modifier
+                                                            .align(alignment = Alignment.TopStart)
+                                                            .requiredSize(size = 35.dp)
+                                                            .padding(5.dp)
+                                                            .clickable {
+                                                                vm.likeRecipe(receta._id)
+                                                            },
+                                                        tint = Color.White,
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
 
@@ -320,7 +357,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                             Column(modifier = Modifier.padding(start= 11.dp, end = 11.dp, top = 5.dp)){
                                                 Row{
                                                     Text(
-                                                        text = "Lorem ipsum",
+                                                        text = receta.name,
                                                         color = Color.Black,
                                                         textAlign = TextAlign.Center,
                                                         style = TextStyle(
@@ -333,7 +370,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                 }
                                                 Row{
                                                     Text(
-                                                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dapibus mauris ut sagittis lobortis. Proin iaculis sollicitudin mauris eu imperdiet.",
+                                                        text = receta.description,
                                                         color = Color.Black,
                                                         style = TextStyle(
                                                             fontSize = 10.sp,
@@ -347,7 +384,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
 
                                                 Row {
                                                     LazyRow(modifier = Modifier.padding()){
-                                                        for (i in 0..5){
+                                                        for (tag in receta.tags){
                                                             item{
                                                                 Box(modifier = Modifier
                                                                     .padding(end = 11.dp)
@@ -365,7 +402,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                                         )
                                                                     )
                                                                 ){
-                                                                    Text(text = "Categoria $i",
+                                                                    Text(text = tag,
                                                                         color = Color.White,
                                                                         modifier = Modifier
                                                                             .fillMaxWidth()
@@ -385,8 +422,6 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                         }
                                     }
                                 }
-
-
                             }
                         }
                     }
@@ -417,7 +452,9 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                 }
                             }
                             Column{
-                                Box(modifier = Modifier.padding(start = 15.dp, top=5.dp, bottom = 5.dp)){
+                                Box(modifier = Modifier.padding(start = 15.dp, top=5.dp, bottom = 5.dp)
+                                    .clickable { NavigationManager.instance?.navigate(AppScreens.Login.route) }
+                                ){
                                     Box(
                                         modifier = Modifier
                                             .background(

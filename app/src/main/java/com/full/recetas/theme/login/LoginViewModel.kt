@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.full.recetas.models.User
+import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
 import com.full.recetas.network.DataResponse
@@ -37,6 +38,7 @@ class LoginViewModel: ViewModel() {
     private val _checkRememberMe = MutableLiveData<Boolean>(false)
     val checkRememberMe : LiveData<Boolean> = _checkRememberMe
 
+    /*
     init {
         //TODO: Podria hacerse que tuviese que confirmase el inicio de sesion con huella dactilar
         if(!API.isLogged){
@@ -58,7 +60,7 @@ class LoginViewModel: ViewModel() {
 
                         if (data.code == 200) {
                             API.setUser(data.data!!)
-                            NavigationManager.instance?.navigate("bills")
+                            NavigationManager.instance?.navigate(AppScreens.HomeLogged.route)
                         }
                         else if (data.code == 401) {
                             _error.value = "Usuario no reconocido"
@@ -70,7 +72,7 @@ class LoginViewModel: ViewModel() {
                 }
             }
         }
-    }
+    }*/
 
     fun signInWithGoogle(credential: AuthCredential) {
         viewModelScope.launch {
@@ -92,7 +94,7 @@ class LoginViewModel: ViewModel() {
 
                                 if (data.code == 200) {
                                     API.setUser(data.data!!)
-                                    NavigationManager.instance?.navigate("bills")
+                                    NavigationManager.instance?.navigate(AppScreens.HomeLogged.route)
                                 }
                                 else if (data.code == 401) {
                                      _error.value = "Usuario no reconocido"
@@ -177,7 +179,7 @@ class LoginViewModel: ViewModel() {
                             }
                         }
 
-                        NavigationManager.instance?.navigate("bills")
+                        NavigationManager.instance?.navigate(AppScreens.HomeLogged.route)
                     } else {
                         //Podria manejarse tambien los mensajes en el backend y mostrarlos aqui
                         when (response.code) {

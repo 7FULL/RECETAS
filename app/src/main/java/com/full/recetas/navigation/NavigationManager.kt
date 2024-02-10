@@ -1,6 +1,7 @@
 package com.full.recetas.navigation
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -17,8 +18,8 @@ import com.full.recetas.ui.theme.login.checkToken.NewPassword
 import com.full.recetas.ui.theme.login.checkToken.NewPasswordViewModel
 import com.full.recetas.ui.theme.login.forgotPassword.ForgotPassword
 import com.full.recetas.ui.theme.login.forgotPassword.ForgotPasswordViewModel
-import com.full.recetas.theme.mainNoLogged.Home
-import com.full.recetas.theme.mainNoLogged.HomeViewModel
+import com.full.recetas.theme.home.Home
+import com.full.recetas.theme.home.HomeViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
 
@@ -29,7 +30,7 @@ object NavigationManager{
 
         if (instance == null) instance = rememberNavController()
 
-        NavHost(navController = instance!!, startDestination = AppScreens.HomeLogged.route+"?id=1")
+        NavHost(navController = instance!!, startDestination = AppScreens.HomeNoLogged.route)
         {
             composable(AppScreens.Login.route) {
                 Login(loginViewModel = LoginViewModel())
@@ -56,12 +57,16 @@ object NavigationManager{
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
             composable(
-                    route = "${AppScreens.Recipe.route}?id={id}",
+                    route = "${AppScreens.Recipe.route}?id={id}&isLiked={isLiked}",
                     arguments = listOf(
                         navArgument("id") { type = NavType.StringType }
                     )
                 ) {
-                Recipe(productoViewModel = RecipeViewModel(), id = it.arguments?.getString("id") ?: "")
+
+                Log.i("Recipe", "Recipe route: ${it.arguments?.getString("id")}")
+                Log.i("Recipe", "Recipe route: ${it.arguments?.getBoolean("isLiked")}")
+
+                Recipe(vm = RecipeViewModel(id = it.arguments?.getString("id") ?: ""))
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }
