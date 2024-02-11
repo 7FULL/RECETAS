@@ -47,4 +47,7 @@ interface ApiService {
 
     @PUT("api/recipe/unlike")
     suspend fun unlikeRecipe(@Body like: Map<String, String>): Response<DataResponse<Recipe>>
+
+    @GET("api/recipes/likes")
+    suspend fun getLikes(@Query("id") id: String): Response<DataResponse<Array<Recipe>>>
 }

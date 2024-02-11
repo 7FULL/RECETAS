@@ -25,7 +25,8 @@ class HomeViewModel: ViewModel() {
     private val _trendingRecipes = MutableLiveData<Array<Recipe>>()
     val trendingRecipes: LiveData<Array<Recipe>> = _trendingRecipes
 
-    //TODO: Loading
+    private val _isLoading = MutableLiveData(true)
+    val isLoading: LiveData<Boolean> = _isLoading
 
     //This function is called when the component is created
     init {
@@ -62,6 +63,8 @@ class HomeViewModel: ViewModel() {
 
                     _recipes.value = data.data
                     _auxRecipes.value = data.data!!.toMutableList()
+
+                    _isLoading.value = false
                 } else {
                     Log.e("HomeViewModel", "Error getting trending recipes: ${data.code}")
                 }

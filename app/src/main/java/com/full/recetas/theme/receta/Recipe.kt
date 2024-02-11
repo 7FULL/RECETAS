@@ -89,8 +89,6 @@ fun Recipe(vm: RecipeViewModel) {
                                 .clickable { NavigationManager.instance!!.popBackStack() }
                         )
 
-                        Text(text = isLikedLD.toString())
-
                         Text(
                             text = recipe.name,
                             modifier = Modifier.align(alignment = Alignment.Center),
@@ -208,40 +206,42 @@ fun Recipe(vm: RecipeViewModel) {
                                         .align(alignment = Alignment.CenterVertically)
                                         .width(175.dp)
                                 )
-                                //Suscribe button if the publisher followers list doesn't contain the current user
-                                if (!recipe.publisher.followers.contains(API.User.value)){
-                                    Button(onClick = { /*TODO*/ },
-                                        modifier = Modifier
-                                            .padding(start = 10.dp)
-                                            .align(alignment = Alignment.CenterVertically),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(context.getColor(R.color.secondary))
-                                        )
-                                    ){
-                                        Text(text = "Suscribirse",
-                                            style = TextStyle(
-                                                color = Color.Black,
-                                                fontSize = 16.sp,
-                                                textAlign = TextAlign.Center
+                                if(API.isLogged){
+                                    //Suscribe button if the publisher followers list doesn't contain the current user
+                                    if (!recipe.publisher.followers.contains(API.User.value)){
+                                        Button(onClick = { /*TODO*/ },
+                                            modifier = Modifier
+                                                .padding(start = 10.dp)
+                                                .align(alignment = Alignment.CenterVertically),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color(context.getColor(R.color.secondary))
                                             )
-                                        )
-                                    }
-                                }else{
-                                    Button(onClick = { /*TODO*/ },
-                                        modifier = Modifier
-                                            .padding(start = 10.dp)
-                                            .align(alignment = Alignment.CenterVertically),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(context.getColor(R.color.secondary))
-                                        )
-                                    ){
-                                        Text(text = "Desuscribirse",
-                                            style = TextStyle(
-                                                color = Color.Black,
-                                                fontSize = 16.sp,
-                                                textAlign = TextAlign.Center
+                                        ){
+                                            Text(text = "Suscribirse",
+                                                style = TextStyle(
+                                                    color = Color.Black,
+                                                    fontSize = 16.sp,
+                                                    textAlign = TextAlign.Center
+                                                )
                                             )
-                                        )
+                                        }
+                                    }else{
+                                        Button(onClick = { /*TODO*/ },
+                                            modifier = Modifier
+                                                .padding(start = 10.dp)
+                                                .align(alignment = Alignment.CenterVertically),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color(context.getColor(R.color.secondary))
+                                            )
+                                        ){
+                                            Text(text = "Desuscribirse",
+                                                style = TextStyle(
+                                                    color = Color.Black,
+                                                    fontSize = 16.sp,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }

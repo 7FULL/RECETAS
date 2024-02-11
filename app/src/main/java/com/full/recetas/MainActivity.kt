@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SupervisedUserCircle
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
 import com.full.recetas.ui.theme.CRMTheme
@@ -113,7 +115,23 @@ fun BottomBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                     modifier = Modifier
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate("bills") }
+                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate("") }
+                )
+            }
+            Column (
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+            ){
+                Icon(
+                    tint = if (selectedIcon == 1) Color(context.getColor(R.color.selected)) else Color.Black,
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Vector",
+                    modifier = Modifier
+                        .size(size = 50.dp)
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate(AppScreens.Likes.route) }
                 )
             }
             Column (
@@ -124,28 +142,12 @@ fun BottomBar(modifier: Modifier = Modifier, selectedIcon: Int) {
             ){
                 Icon(
                     tint = if (selectedIcon == 2) Color(context.getColor(R.color.selected)) else Color.Black,
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = "Vector",
-                    modifier = Modifier
-                        .size(size = 50.dp)
-                        .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { if (selectedIcon != 2) NavigationManager.instance?.navigate("analisis") }
-                )
-            }
-            Column (
-                modifier = modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-            ){
-                Icon(
-                    tint = if (selectedIcon == 3) Color(context.getColor(R.color.selected)) else Color.Black,
                     imageVector = Icons.Rounded.AddCircle,
                     contentDescription = "Vector",
                     modifier = Modifier
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { if (selectedIcon != 3) API.logout() }
+                        .clickable { if (selectedIcon != 2) API.logout() }
                 )
             }
             Column (
@@ -171,13 +173,13 @@ fun BottomBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                     .padding(top = 12.dp)
             ){
                 Icon(
-                    tint = if (selectedIcon == 3) Color(context.getColor(R.color.selected)) else Color.Black,
-                    imageVector = Icons.Rounded.Search,
+                    tint = if (selectedIcon == 4) Color(context.getColor(R.color.selected)) else Color.Black,
+                    imageVector = Icons.Rounded.CalendarMonth,
                     contentDescription = "Vector",
                     modifier = Modifier
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { if (selectedIcon != 3) API.logout() }
+                        .clickable { if (selectedIcon != 4) API.logout() }
                 )
             }
         }

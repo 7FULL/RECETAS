@@ -20,6 +20,8 @@ import com.full.recetas.ui.theme.login.forgotPassword.ForgotPassword
 import com.full.recetas.ui.theme.login.forgotPassword.ForgotPasswordViewModel
 import com.full.recetas.theme.home.Home
 import com.full.recetas.theme.home.HomeViewModel
+import com.full.recetas.theme.likes.Likes
+import com.full.recetas.theme.likes.LikesViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
 
@@ -67,6 +69,10 @@ object NavigationManager{
                 Log.i("Recipe", "Recipe route: ${it.arguments?.getBoolean("isLiked")}")
 
                 Recipe(vm = RecipeViewModel(id = it.arguments?.getString("id") ?: ""))
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Likes.route) {
+                Likes(vm = LikesViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }
