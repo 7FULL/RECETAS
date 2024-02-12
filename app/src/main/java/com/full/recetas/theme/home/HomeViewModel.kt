@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.full.recetas.models.Recipe
+import com.full.recetas.models.Tag
 import com.full.recetas.network.API
 import com.full.recetas.network.DataResponse
 import kotlinx.coroutines.launch
@@ -27,6 +28,9 @@ class HomeViewModel: ViewModel() {
 
     private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _tags = MutableLiveData<Array<Tag>>(emptyArray())
+    val tags: LiveData<Array<Tag>> = _tags
 
     //This function is called when the component is created
     init {
@@ -70,6 +74,22 @@ class HomeViewModel: ViewModel() {
                 }
             } else {
                 Log.e("HomeViewModel", "Error getting trending recipes: ${result.code()}")
+            }
+        }
+
+        viewModelScope.launch {
+            val result = API.service.getTags()
+
+            if (result.isSuccessful) {
+                val data: DataResponse<Array<Tag>> = result.body()!!
+
+                if (data.code == 200) {
+                    _tags.value = data.data
+                } else {
+                    Log.e("HomeViewModel", "Error getting tags: ${data.code}")
+                }
+            } else {
+                Log.e("HomeViewModel", "Error getting tags: ${result.code()}")
             }
         }
     }

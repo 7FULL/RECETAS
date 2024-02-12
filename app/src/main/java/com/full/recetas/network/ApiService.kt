@@ -1,6 +1,7 @@
 package com.full.recetas.network
 
 import com.full.recetas.models.Recipe
+import com.full.recetas.models.Tag
 import com.full.recetas.models.User
 import retrofit2.Response
 import retrofit2.http.Body
@@ -50,4 +51,7 @@ interface ApiService {
 
     @GET("api/recipes/likes")
     suspend fun getLikes(@Query("id") id: String): Response<DataResponse<Array<Recipe>>>
+
+    @GET("api/tags")
+    suspend fun getTags(): Response<DataResponse<Array<Tag>>>
 }

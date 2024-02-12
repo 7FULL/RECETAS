@@ -67,6 +67,7 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.R
 import com.full.recetas.BottomBar
 import com.full.recetas.models.Recipe
+import com.full.recetas.models.Tag
 import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
@@ -81,6 +82,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
 
     val auxRecipes: MutableList<Recipe> by vm.auxRecipes.observeAsState(mutableListOf())
     val trendingRecipes: Array<Recipe> by vm.trendingRecipes.observeAsState(emptyArray())
+    val tags: Array<Tag> by vm.tags.observeAsState(emptyArray())
 
     val context = LocalContext.current
 
@@ -247,7 +249,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                 //Categorias
                 Row {
                     LazyRow(modifier = Modifier.padding(11.dp, top = 0.dp, bottom = 20.dp)){
-                        for (i in 0..5){
+                        for (tag in tags){
                             item{
                                 Box(modifier = Modifier
                                     .padding(end = 11.dp)
@@ -257,7 +259,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                     .requiredHeight(height = 36.dp)
                                     .background(color = Color(context.getColor(R.color.primary)))
                                 ){
-                                    Text(text = "Categoria $i",
+                                    Text(text = tag.name,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .align(Alignment.Center)
