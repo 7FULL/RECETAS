@@ -523,7 +523,7 @@ fun Input(modifier: Modifier = Modifier, label: String, placeholder: String,
             style = TextStyle(
                 fontSize = 14.sp),
             modifier = Modifier
-                .requiredWidth(width = 245.dp))
+                .width(width = 245.dp))
 
         TextField(
             modifier = Modifier
@@ -532,8 +532,8 @@ fun Input(modifier: Modifier = Modifier, label: String, placeholder: String,
                     x = 1.dp,
                     y = 27.dp
                 )
-                .requiredWidth(width = 263.dp)
-                .requiredHeight(height = 46.dp)
+                .width(width = 263.dp)
+                .height(height = 46.dp)
                 .clip(shape = RoundedCornerShape(3.dp))
                 .background(color = Color(0xfff4f4f4)),
             colors = TextFieldDefaults.colors(

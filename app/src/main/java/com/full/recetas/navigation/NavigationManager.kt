@@ -24,6 +24,7 @@ import com.full.recetas.theme.likes.Likes
 import com.full.recetas.theme.likes.LikesViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
+import com.full.recetas.theme.recetaCreation.CreateRecipeViewModel
 
 object NavigationManager{
     var instance: NavHostController? = null;
@@ -73,6 +74,10 @@ object NavigationManager{
             }
             composable(AppScreens.Likes.route) {
                 Likes(vm = LikesViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.CreateRecipe.route) {
+                com.full.recetas.theme.recetaCreation.CreateRecipe(vm = CreateRecipeViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }

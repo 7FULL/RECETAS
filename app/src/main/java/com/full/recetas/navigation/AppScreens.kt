@@ -8,6 +8,6 @@ sealed class AppScreens(val route: String) {
     object HomeNoLogged : AppScreens("mainNoLogged")
     object HomeLogged : AppScreens("mainLogged")
     object Recipe : AppScreens("recipe")
-
     object Likes : AppScreens("likes")
+    object CreateRecipe : AppScreens("createRecipe")
 }
