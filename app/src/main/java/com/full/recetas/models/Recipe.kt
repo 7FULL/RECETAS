@@ -9,7 +9,7 @@ data class Recipe(
     val minutes: Int = 0,
     val description: String = "",
     val cookingInstructions: List<String> = listOf(),
-    val ingredients: List<String> = listOf(),
+    val ingredients: List<Ingredient> = listOf(),
     val likes: Int = 0,
     val tags: List<String> = listOf()
 )

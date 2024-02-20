@@ -54,4 +54,7 @@ interface ApiService {
 
     @GET("api/tags")
     suspend fun getTags(): Response<DataResponse<Array<Tag>>>
+
+    @POST("api/recipe")
+    suspend fun createRecipe(@Body recipe: Recipe): Response<DataResponse<Recipe>>
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -513,7 +514,7 @@ fun MainNoLoggedPreview() {
 @Composable
 fun Input(modifier: Modifier = Modifier, label: String, placeholder: String,
           type: KeyboardType = KeyboardType.Text, onInputChanged: (String) -> Unit,
-          value: String) {
+          value: String, singleLine: Boolean = true){
     Box(
         modifier = modifier
     ) {
@@ -533,7 +534,7 @@ fun Input(modifier: Modifier = Modifier, label: String, placeholder: String,
                     y = 27.dp
                 )
                 .width(width = 263.dp)
-                .height(height = 46.dp)
+                .defaultMinSize(minHeight = 46.dp)
                 .clip(shape = RoundedCornerShape(3.dp))
                 .background(color = Color(0xfff4f4f4)),
             colors = TextFieldDefaults.colors(
@@ -549,6 +550,8 @@ fun Input(modifier: Modifier = Modifier, label: String, placeholder: String,
                     fontSize = 12.sp,
                 )
             },
+            singleLine = singleLine,
+            maxLines = 3,
             onValueChange = { onInputChanged(it) },
             visualTransformation =
             if (type == KeyboardType.Password)

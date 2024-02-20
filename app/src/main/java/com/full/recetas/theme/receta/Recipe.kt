@@ -271,7 +271,7 @@ fun Recipe(vm: RecipeViewModel) {
                             LazyColumn(modifier = Modifier.height(93.dp)){
                                 items(recipe.ingredients.size) { index ->
                                     Text(
-                                        text = recipe.ingredients[index],
+                                        text = recipe.ingredients[index].name,
                                         style = TextStyle(
                                             color = Color.Black,
                                             fontSize = 18.sp

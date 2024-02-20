@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.full.recetas.R
+import com.full.recetas.models.Ingredient
 import com.full.recetas.models.Recipe
 import com.full.recetas.models.User
 import com.full.recetas.network.API
@@ -49,7 +50,7 @@ class RecipeViewModel(id: String): ViewModel(){
                         _id = "0",
                         name = "Error",
                         description = "Error getting recipe",
-                        ingredients = listOf("Error"),
+                        ingredients = listOf(Ingredient("Error", "0")),
                         cookingInstructions = listOf("Error"),
                         image = "https://cdn-icons-png.flaticon.com/512/5220/5220262.png",
                         likes = 0,

@@ -40,7 +40,7 @@ object API {
     var mainActivity: MainActivity? = null
 
     val isLogged: Boolean
-        get() = User.value != null
+        get() = _user.value != null
 
     private val _user: MutableLiveData<User> = MutableLiveData<User>()
     val User: LiveData<User> = _user
