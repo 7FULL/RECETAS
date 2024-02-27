@@ -3,6 +3,7 @@ package com.full.recetas.navigation
 import android.content.pm.ActivityInfo
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import com.full.recetas.theme.likes.LikesViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
 import com.full.recetas.theme.recetaCreation.CreateRecipeViewModel
+import com.full.recetas.utils.SavePhotoToGalleryUseCase
 
 object NavigationManager{
     var instance: NavHostController? = null;
@@ -77,7 +79,9 @@ object NavigationManager{
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
             composable(AppScreens.CreateRecipe.route) {
-                com.full.recetas.theme.recetaCreation.CreateRecipe(vm = CreateRecipeViewModel())
+                com.full.recetas.theme.recetaCreation.CreateRecipe(vm = CreateRecipeViewModel(
+                    SavePhotoToGalleryUseCase(LocalContext.current)
+                ))
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }

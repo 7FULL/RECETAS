@@ -1,17 +1,32 @@
 package com.full.recetas.theme.recetaCreation
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.opengl.ETC1.encodeImage
+import android.util.Base64
+import android.util.Log
 import android.widget.Toast
+import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.full.recetas.models.CameraState
 import com.full.recetas.models.Ingredient
+import com.full.recetas.models.Recipe
 import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
+import com.full.recetas.utils.SavePhotoToGalleryUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
 
-class CreateRecipeViewModel: ViewModel() {
+class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase): ViewModel() {
 
     // Recipe data
     val _recipeName = MutableLiveData<String>()
@@ -36,6 +51,9 @@ class CreateRecipeViewModel: ViewModel() {
 
     private val _instructions = MutableLiveData<List<String>>()
     val instructions: LiveData<List<String>> = _instructions
+
+    private val _image = MutableLiveData<Bitmap>()
+    val image: LiveData<Bitmap> = _image
     init {
         if (!API.isLogged){
             NavigationManager.instance!!.navigate(AppScreens.Login.route)
@@ -74,26 +92,48 @@ class CreateRecipeViewModel: ViewModel() {
     }
 
     // Create recipe
-    fun createRecipe(){
+    fun createRecipe(selectedIndexes: List<Int>, image: Bitmap?){
         if(isValid()){
-            val recipe = com.full.recetas.models.Recipe(
+            val ingredientOptions = listOf("G", "KG", "ML", "L")
+
+            // We add the selected quantity
+            val ingredients = _ingredients.value?.toMutableList() ?: mutableListOf()
+
+            for (i in ingredients.indices){
+                ingredients[i] = ingredients[i].copy(quantity = ingredients[i].quantity + " " + ingredientOptions[selectedIndexes[i]])
+            }
+
+            if (image == null){
+                Toast.makeText(API.mainActivity, "Falta la imagen", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val recipe = Recipe(
                 name = recipeName.value!!,
+                publisher = API.User.value!!,
                 description = recipeDescription.value!!,
                 minutes = recipeMinutes.value!!.toInt(),
                 tags = selectedTags.value!!,
-                ingredients = ingredients.value!!,
-                cookingInstructions = instructions.value!!
+                ingredients = ingredients,
+                cookingInstructions = instructions.value?.toMutableList() ?: mutableListOf(),
             )
 
             viewModelScope.launch {
-                val response = API.service.createRecipe(recipe)
+                val stream = ByteArrayOutputStream()
+                image.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                val byteArray = stream.toByteArray()
+
+                val requestFile = RequestBody.create(MediaType.parse("image/*"), byteArray)
+                val imagePart = MultipartBody.Part.createFormData("photo", "photo.png", requestFile)
+
+                val response = API.service.createRecipe(recipe, imagePart)
 
                 if(response.isSuccessful){
                     val data = response.body()!!
 
                     if(data.code == 200){
                         Toast.makeText(API.mainActivity, "Receta creada", Toast.LENGTH_SHORT).show()
-                        NavigationManager.instance!!.navigate(AppScreens.Recipe.route + "/${data.data!!._id}")
+                        //NavigationManager.instance!!.navigate(AppScreens.Recipe.route + "/${data.data!!._id}")
                     }else{
                         Toast.makeText(API.mainActivity, "Error creando receta", Toast.LENGTH_SHORT).show()
                     }
@@ -163,7 +203,19 @@ class CreateRecipeViewModel: ViewModel() {
     // On change ingredient
     fun onChangeIngredient(index: Int, name: String = "", quantity: String = ""){
         val list = _ingredients.value?.toMutableList() ?: mutableListOf()
-        list[index] = Ingredient(name, quantity)
+
+        var nameAux = name
+        var quantityAux = quantity
+
+        if(name.isEmpty()){
+            nameAux = list[index].name
+        }
+
+        if(quantity.isEmpty()){
+            quantityAux = list[index].quantity
+        }
+
+        list[index] = Ingredient(nameAux, quantityAux)
         _ingredients.value = list
     }
 
@@ -187,6 +239,8 @@ class CreateRecipeViewModel: ViewModel() {
         list[index] = instruction
         _instructions.value = list
     }
+    
+    
 
     // Request Image from gallery
     fun requestImage(){
@@ -196,5 +250,25 @@ class CreateRecipeViewModel: ViewModel() {
     // Rquest Image from camera
     fun requestCamera(){
         //TODO
+    }
+
+    private val _state = MutableStateFlow(CameraState())
+    val state = _state.asStateFlow()
+
+    fun storePhotoInGallery(bitmap: Bitmap) {
+        viewModelScope.launch {
+            savePhotoToGalleryUseCase.call(bitmap)
+            updateCapturedPhotoState(bitmap)
+        }
+    }
+
+    private fun updateCapturedPhotoState(updatedPhoto: Bitmap?) {
+        _state.value.capturedImage?.recycle()
+        _state.value = _state.value.copy(capturedImage = updatedPhoto)
+    }
+
+    override fun onCleared() {
+        _state.value.capturedImage?.recycle()
+        super.onCleared()
     }
 }

@@ -1,6 +1,17 @@
 package com.full.recetas.theme.recetaCreation
 
+import android.content.Context
+import android.graphics.Bitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.util.Log
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.widget.LinearLayout
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
+import androidx.camera.view.LifecycleCameraController
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +50,8 @@ import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -52,6 +65,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -66,11 +81,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.TextStyle
@@ -79,13 +99,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.BottomBar
 import com.full.recetas.R
+import com.full.recetas.models.CameraState
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
 import com.full.recetas.theme.home.Input
+import com.full.recetas.utils.rotateBitmap
+import java.util.concurrent.Executor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,7 +148,12 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
 
     val context = LocalContext.current
 
+    val cameraState: CameraState by vm.state.collectAsStateWithLifecycle()
 
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    val cameraController: LifecycleCameraController = remember { LifecycleCameraController(context) }
+
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold (
         topBar = {
@@ -151,6 +182,38 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
         }
     ) {
         innerPadding ->
+
+        //Meter esto dentro de un modalsheet o un dialog TODO
+        if(showBottomSheet){
+            ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+                Box(modifier = Modifier.fillMaxSize()){
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        factory = { context ->
+                            PreviewView(context).apply {
+                                layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                                scaleType = PreviewView.ScaleType.FILL_START
+                            }.also { previewView ->
+                                previewView.controller = cameraController
+                                cameraController.bindToLifecycle(lifecycleOwner)
+                            }
+                        }
+                    )
+
+                    Button(modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 25.dp)
+                        .align(alignment = Alignment.BottomCenter),
+                        onClick = {
+                            capturePhoto(context, cameraController, vm::storePhotoInGallery)
+                        }) {
+                        Text("Tomar foto")
+                    }
+                }
+            }
+        }
 
        if (active){
            SearchBar(
@@ -385,14 +448,9 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                                                 onInputChanged = {
                                                     var quantityText = it
 
-                                                    // We check for the ingredient option and add it to the quantity
-                                                    if (selectedIndexes[i] != -1){
-                                                        quantityText += " " + ingredientOptions[selectedIndexes[i]]
-                                                    }
-
                                                     vm.onChangeIngredient(quantity = quantityText, index = i)
                                                                  },
-                                                value = ingredients[i].name,
+                                                value = ingredients[i].quantity,
                                                 type = KeyboardType.Number,
                                                 modifier = Modifier
                                                     .width(175.dp)
@@ -564,12 +622,20 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                                 // Icon button of camera
                                 IconButton(
                                     onClick = {
-                                        vm.requestImage()
+                                        showBottomSheet = true
                                     },
                                 ) {
                                     Icon(Icons.Default.CameraAlt, contentDescription = null,
                                         modifier = Modifier.size(150.dp))
                                 }
+                            }
+                        }
+
+                        Row{
+                            if (cameraState.capturedImage != null) {
+                                LastPhotoPreview(
+                                    lastCapturedPhoto = cameraState.capturedImage!!
+                                )
                             }
                         }
                     }
@@ -583,7 +649,7 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                     .padding(start = 75.dp, end = 75.dp, bottom = 25.dp)){
                     Button(
                         onClick = {
-                            vm.createRecipe()
+                            vm.createRecipe(selectedIndexes, cameraState.capturedImage)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -593,5 +659,51 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                 }
             }
         }
+    }
+}
+
+private fun capturePhoto(
+    context: Context,
+    cameraController: LifecycleCameraController,
+    onPhotoCaptured: (Bitmap) -> Unit
+) {
+    val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
+
+    cameraController.takePicture(mainExecutor, object : ImageCapture.OnImageCapturedCallback() {
+        override fun onCaptureSuccess(image: ImageProxy) {
+            val correctedBitmap: Bitmap = image
+                .toBitmap()
+                .rotateBitmap(image.imageInfo.rotationDegrees)
+
+            onPhotoCaptured(correctedBitmap)
+            image.close()
+        }
+
+        override fun onError(exception: ImageCaptureException) {
+            Log.e("CameraContent", "Error capturing image", exception)
+        }
+    })
+}
+
+@Composable
+private fun LastPhotoPreview(
+    modifier: Modifier = Modifier,
+    lastCapturedPhoto: Bitmap
+) {
+
+    val capturedPhoto: ImageBitmap = remember(lastCapturedPhoto.hashCode()) { lastCapturedPhoto.asImageBitmap() }
+
+    Card(
+        modifier = modifier
+            .size(128.dp)
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = MaterialTheme.shapes.large
+    ) {
+        Image(
+            bitmap = capturedPhoto,
+            contentDescription = "Last captured photo",
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+        )
     }
 }

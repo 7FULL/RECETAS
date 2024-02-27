@@ -3,11 +3,15 @@ package com.full.recetas.network
 import com.full.recetas.models.Recipe
 import com.full.recetas.models.Tag
 import com.full.recetas.models.User
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface ApiService {
@@ -55,6 +59,7 @@ interface ApiService {
     @GET("api/tags")
     suspend fun getTags(): Response<DataResponse<Array<Tag>>>
 
+    @Multipart
     @POST("api/recipe")
-    suspend fun createRecipe(@Body recipe: Recipe): Response<DataResponse<Recipe>>
+    suspend fun createRecipe(@Part("recipe") recipe: Recipe, @Part photo: MultipartBody.Part): Response<DataResponse<Recipe>>
 }

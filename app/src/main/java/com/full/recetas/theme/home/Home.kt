@@ -219,6 +219,7 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                             .background(color = Color(context.getColor(R.color.unselected)))
                                     ) {
                                         Row{
+                                            Log.i("Home", "Image: ${receta.image}")
                                             GlideImage(model = receta.image,
                                                 contentDescription = "Recipe",
                                                 contentScale = ContentScale.Crop,
