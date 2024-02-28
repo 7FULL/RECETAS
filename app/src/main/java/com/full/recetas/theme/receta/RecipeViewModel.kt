@@ -67,9 +67,9 @@ class RecipeViewModel(id: String): ViewModel(){
                             token = "Error",
                             username = "Error",
                             image = "Error",
-                            recipes = listOf(Recipe()),
-                            following = listOf(User()),
-                            followers = listOf(User()),
+                            recipes = listOf(),
+                            following = arrayListOf(),
+                            followers = arrayListOf(),
                         )
                     )
                 }

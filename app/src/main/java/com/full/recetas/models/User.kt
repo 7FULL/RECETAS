@@ -10,9 +10,9 @@ data class User(
     var phone: String = "",
     var image: String = "",
     var likes: ArrayList<String> = arrayListOf(),
-    var recipes: List<Recipe> = listOf(),
-    var following: List<User> = listOf(),
-    var followers: List<User> = listOf(),
+    var recipes: List<String> = listOf(),
+    var following: ArrayList<String> = arrayListOf(),
+    var followers: ArrayList<String> = arrayListOf(),
     var token: String = ""
 ){
 }

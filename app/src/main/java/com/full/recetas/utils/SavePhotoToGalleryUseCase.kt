@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
@@ -63,6 +64,9 @@ class SavePhotoToGalleryUseCase(
                     imageContentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
                     resolver.update(uri, imageContentValues, null, null)
                 }
+
+                // We send a notification to the user
+                Toast.makeText(context, "Imagen guardada en la galería", Toast.LENGTH_SHORT).show()
 
                 Result.success(Unit)
             }.getOrElse { exception: Throwable ->

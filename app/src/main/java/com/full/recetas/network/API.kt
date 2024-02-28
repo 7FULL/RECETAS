@@ -7,6 +7,7 @@ import com.full.recetas.MainActivity
 import com.full.recetas.models.Recipe
 import com.full.recetas.models.User
 import com.full.recetas.navigation.NavigationManager
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -30,6 +31,8 @@ object API {
     val service : ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }
+
+    val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create()
 
     private val _trendingRecipes = MutableLiveData<Array<Recipe>>()
     val trendingRecipes: LiveData<Array<Recipe>> = _trendingRecipes

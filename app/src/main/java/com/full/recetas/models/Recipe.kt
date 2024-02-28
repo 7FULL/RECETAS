@@ -1,7 +1,7 @@
 package com.full.recetas.models
 
 data class Recipe(
-    val _id: String = "",
+    var _id: String = "",
     val name: String = "",
     val publisher: User = User(),
     val image: String = "",

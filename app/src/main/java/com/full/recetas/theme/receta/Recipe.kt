@@ -181,7 +181,7 @@ fun Recipe(vm: RecipeViewModel) {
                                 .fillMaxWidth()
                         ) {
                             //Publisher
-                            Row{
+                            Row(modifier = Modifier.clickable { NavigationManager.instance!!.navigate("userProfile?id=${recipe.publisher._id}") }){
                                 GlideImage(model = recipe.publisher.image,
                                     contentDescription = "Publisher",
                                     contentScale = ContentScale.Crop,
@@ -208,7 +208,7 @@ fun Recipe(vm: RecipeViewModel) {
                                 )
                                 if(API.isLogged){
                                     //Suscribe button if the publisher followers list doesn't contain the current user
-                                    if (!recipe.publisher.followers.contains(API.User.value)){
+                                    if (!recipe.publisher.followers.contains(API.User.value!!._id)){
                                         Button(onClick = { /*TODO*/ },
                                             modifier = Modifier
                                                 .padding(start = 10.dp)
@@ -217,7 +217,7 @@ fun Recipe(vm: RecipeViewModel) {
                                                 containerColor = Color(context.getColor(R.color.secondary))
                                             )
                                         ){
-                                            Text(text = "Suscribirse",
+                                            Text(text = "Seguir",
                                                 style = TextStyle(
                                                     color = Color.Black,
                                                     fontSize = 16.sp,
@@ -234,7 +234,7 @@ fun Recipe(vm: RecipeViewModel) {
                                                 containerColor = Color(context.getColor(R.color.secondary))
                                             )
                                         ){
-                                            Text(text = "Desuscribirse",
+                                            Text(text = "Dejar de seguir",
                                                 style = TextStyle(
                                                     color = Color.Black,
                                                     fontSize = 16.sp,

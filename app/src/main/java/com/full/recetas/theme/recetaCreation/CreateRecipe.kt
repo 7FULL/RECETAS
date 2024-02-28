@@ -93,6 +93,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -102,6 +103,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.full.recetas.BottomBar
@@ -113,7 +115,7 @@ import com.full.recetas.theme.home.Input
 import com.full.recetas.utils.rotateBitmap
 import java.util.concurrent.Executor
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun CreateRecipe(vm: CreateRecipeViewModel) {
     val tags by vm.tags.observeAsState(listOf())
@@ -154,6 +156,8 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
     val cameraController: LifecycleCameraController = remember { LifecycleCameraController(context) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    val imageSRC by vm.imageSRC.observeAsState("")
 
     Scaffold (
         topBar = {
@@ -396,6 +400,7 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                                 for (tag in selectedTags){
                                     item{
                                         InputChip(
+                                            modifier = Modifier.padding(end = 5.dp),
                                             selected = true,
                                             onClick = {  },
                                             colors = InputChipDefaults.inputChipColors(selectedContainerColor = Color(context.getColor(R.color.primary))),
@@ -636,6 +641,21 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                                 LastPhotoPreview(
                                     lastCapturedPhoto = cameraState.capturedImage!!
                                 )
+                            }else if(imageSRC.isNotEmpty()){
+                                Card(
+                                    modifier = Modifier
+                                        .size(128.dp)
+                                        .padding(16.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    shape = MaterialTheme.shapes.large
+                                ) {
+                                    GlideImage(
+                                        model = imageSRC,
+                                        contentDescription = "Recipe image",
+                                        contentScale = ContentScale.Crop,
+                                        loading = placeholder(R.drawable.loading)
+                                    )
+                                }
                             }
                         }
                     }
@@ -654,7 +674,7 @@ fun CreateRecipe(vm: CreateRecipeViewModel) {
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        Text("Crear receta")
+                        Text(if (recipeName.isEmpty()) "Crear receta" else "Editar receta")
                     }
                 }
             }

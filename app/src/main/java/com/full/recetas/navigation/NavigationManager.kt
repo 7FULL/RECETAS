@@ -23,9 +23,13 @@ import com.full.recetas.theme.home.Home
 import com.full.recetas.theme.home.HomeViewModel
 import com.full.recetas.theme.likes.Likes
 import com.full.recetas.theme.likes.LikesViewModel
+import com.full.recetas.theme.profile.Profile
+import com.full.recetas.theme.profile.ProfileViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
 import com.full.recetas.theme.recetaCreation.CreateRecipeViewModel
+import com.full.recetas.theme.userProfile.UserProfile
+import com.full.recetas.theme.userProfile.UserProfileViewModel
 import com.full.recetas.utils.SavePhotoToGalleryUseCase
 
 object NavigationManager{
@@ -78,10 +82,29 @@ object NavigationManager{
                 Likes(vm = LikesViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
-            composable(AppScreens.CreateRecipe.route) {
+            composable(
+                route = AppScreens.CreateRecipe.route + "?recipe={recipe}",
+                arguments = listOf(
+                    navArgument("recipe") { type = NavType.StringType }
+                )
+            ) {
                 com.full.recetas.theme.recetaCreation.CreateRecipe(vm = CreateRecipeViewModel(
-                    SavePhotoToGalleryUseCase(LocalContext.current)
+                    SavePhotoToGalleryUseCase(LocalContext.current),
+                    recipeString = it.arguments?.getString("recipe") ?: ""
                 ))
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Profile.route) {
+                Profile(vm = ProfileViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(
+                route = "${AppScreens.UserProfile.route}?id={id}",
+                arguments = listOf(
+                    navArgument("id") { type = NavType.StringType }
+                )
+            ) {
+                UserProfile(vm = UserProfileViewModel(id = it.arguments?.getString("id") ?: ""))
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }

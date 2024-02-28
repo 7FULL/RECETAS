@@ -96,7 +96,9 @@ fun BottomBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                     modifier = Modifier
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate("") }
+                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate(
+                            AppScreens.Profile.route
+                        ) }
                 )
             }
             Column (
@@ -134,7 +136,7 @@ fun BottomBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                         .align(alignment = Alignment.CenterHorizontally)
                         .clickable {
                             if (selectedIcon != 2) NavigationManager.instance?.navigate(
-                                AppScreens.CreateRecipe.route
+                                AppScreens.CreateRecipe.route+"?recipe="
                             )
                         }
                 )

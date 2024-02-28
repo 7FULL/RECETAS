@@ -7,6 +7,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -61,5 +62,25 @@ interface ApiService {
 
     @Multipart
     @POST("api/recipe")
-    suspend fun createRecipe(@Part("recipe") recipe: Recipe, @Part photo: MultipartBody.Part): Response<DataResponse<Recipe>>
+    suspend fun createRecipe(@Part("recipe") recipe: Recipe, @Part photo: MultipartBody.Part, @Query("edit") isEdit: Boolean): Response<DataResponse<Recipe>>
+
+    // Recipes by userID
+    @GET("api/recipes/user")
+    suspend fun getRecipesByUser(@Query("id") id: String): Response<DataResponse<Array<Recipe>>>
+
+    // Delete recipe by ID
+    @POST("api/recipe/delete")
+    suspend fun deleteRecipe(@Body recipe: Recipe): Response<DataResponse<String>>
+
+    // Follow user
+    @POST("api/user/follow")
+    suspend fun followUser(@Body follow: Map<String, String>): Response<DataResponse<String>>
+
+    // Unfollow user
+    @POST("api/user/unfollow")
+    suspend fun unfollow(@Body follow: Map<String, String>): Response<DataResponse<String>>
+
+    //Get user by id
+    @GET("api/user/id")
+    suspend fun getUserById(@Query("id") id: String): Response<DataResponse<User>>
 }
