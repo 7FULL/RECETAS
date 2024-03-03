@@ -28,6 +28,8 @@ import com.full.recetas.theme.profile.ProfileViewModel
 import com.full.recetas.theme.receta.Recipe
 import com.full.recetas.theme.receta.RecipeViewModel
 import com.full.recetas.theme.recetaCreation.CreateRecipeViewModel
+import com.full.recetas.theme.register.Register
+import com.full.recetas.theme.register.RegisterViewModel
 import com.full.recetas.theme.userProfile.UserProfile
 import com.full.recetas.theme.userProfile.UserProfileViewModel
 import com.full.recetas.utils.SavePhotoToGalleryUseCase
@@ -105,6 +107,10 @@ object NavigationManager{
                 )
             ) {
                 UserProfile(vm = UserProfileViewModel(id = it.arguments?.getString("id") ?: ""))
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Register.route) {
+                Register(vm = RegisterViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }

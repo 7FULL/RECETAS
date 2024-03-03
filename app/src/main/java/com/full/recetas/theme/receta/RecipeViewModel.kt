@@ -22,6 +22,12 @@ class RecipeViewModel(id: String): ViewModel(){
     private val _isLiked = MutableLiveData<Boolean>()
     val isLiked: LiveData<Boolean> = _isLiked
 
+    private val _isFollowing = MutableLiveData<Boolean>()
+    val isFollowing: LiveData<Boolean> = _isFollowing
+
+    private val _likesText = MutableLiveData<String>()
+    val likesText: LiveData<String> = _likesText
+
     init {
         getrecipe(id, true)
     }
@@ -41,6 +47,12 @@ class RecipeViewModel(id: String): ViewModel(){
 
                         if (initial) {
                             _isLiked.value = currentUser.likes.contains(data.data!!._id)
+
+                            _isFollowing.value = currentUser.following.contains(data.data!!.publisher._id)
+
+                            val likes = recipe.value!!.likes
+
+                            _likesText.value = if (likes > 1000) "${likes / 1000}K" else likes.toString()
                         }
                     }
                 }else{
@@ -95,19 +107,23 @@ class RecipeViewModel(id: String): ViewModel(){
 
                 if(data.code == 200){
                     Log.i("RecipeViewModel", "Liked recipe: $data")
+
+                    _isLiked.value = true
+
+                    //We update our user's liked recipes
+                    API.User.value!!.likes.add(id)
+
+                    recipe.value!!.likes++
+
+                    val likes = recipe.value!!.likes
+
+                    _likesText.value = if (likes > 1000) "${likes / 1000}K" else likes.toString()
                 }else{
                     Log.i("RecipeViewModel", "Error liking recipe: $data")
                 }
             }else{
                 Log.i("RecipeViewModel", "Error liking recipe: ${response.code()} ${response.message()}")
             }
-
-            getrecipe(id)
-
-            _isLiked.value = true
-
-            //We update our user's liked recipes
-            API.User.value!!.likes.add(id)
         }
     }
 
@@ -127,6 +143,17 @@ class RecipeViewModel(id: String): ViewModel(){
 
                 if(data.code == 200){
                     Log.i("RecipeViewModel", "Unliked recipe: $data")
+
+                    recipe.value!!.likes--
+
+                    _isLiked.value = false
+
+                    //We update our user's liked recipes
+                    API.User.value!!.likes.remove(id)
+
+                    val likes = recipe.value!!.likes
+
+                    _likesText.value = if (likes > 1000) "${likes / 1000}K" else likes.toString()
                 }else{
                     Log.i("RecipeViewModel", "Error unliking recipe: $data")
                 }
@@ -134,13 +161,58 @@ class RecipeViewModel(id: String): ViewModel(){
                 Log.i("RecipeViewModel", "Error unliking recipe: ${response.code()} ${response.message()}")
             }
         }
+    }
 
-        getrecipe(id)
+    fun followUser(id: String){
+        val currentUser = API.User.value!!
 
-        _isLiked.value = false
+        val map = mapOf("userToFollow" to id, "userFollowing" to currentUser._id)
 
-        //We update our user's liked recipes
-        API.User.value!!.likes.remove(id)
+        viewModelScope.launch {
+            val response = API.service.followUser(map)
+
+            if(response.isSuccessful){
+                val data: DataResponse<String> = response.body()!!
+
+                if(data.code == 200){
+                    Log.i("RecipeViewModel", "Followed user: $data")
+
+                    recipe.value!!.publisher.followers.add(currentUser._id)
+
+                    _isFollowing.value = true
+                }else{
+                    Log.i("RecipeViewModel", "Error following user: $data")
+                }
+            }else{
+                Log.i("RecipeViewModel", "Error following user: ${response.code()} ${response.message()}")
+            }
+        }
+    }
+
+    fun unfollowUser(id: String){
+        val currentUser = API.User.value!!
+
+        val map = mapOf("userToUnfollow" to id, "userUnfollowing" to currentUser._id)
+
+        viewModelScope.launch {
+            val response = API.service.unfollow(map)
+
+            if(response.isSuccessful){
+                val data: DataResponse<String> = response.body()!!
+
+                if(data.code == 200){
+                    Log.i("RecipeViewModel", "Unfollowed user: $data")
+
+                    recipe.value!!.publisher.followers.remove(currentUser._id)
+
+                    _isFollowing.value = false
+                }else{
+                    Log.i("RecipeViewModel", "Error unfollowing user: $data")
+                }
+            }else{
+                Log.i("RecipeViewModel", "Error unfollowing user: ${response.code()} ${response.message()}")
+            }
+        }
     }
 }
 

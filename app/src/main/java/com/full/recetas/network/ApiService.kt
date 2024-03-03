@@ -83,4 +83,8 @@ interface ApiService {
     //Get user by id
     @GET("api/user/id")
     suspend fun getUserById(@Query("id") id: String): Response<DataResponse<User>>
+
+    //Register user
+    @POST("api/user/register")
+    suspend fun registerUser(@Body user: User): Response<DataResponse<String>>
 }

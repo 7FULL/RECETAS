@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.full.recetas.R
+import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.ui.theme.login.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -154,10 +155,10 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .align(alignment = Alignment.Center)
                 .offset(
                     x = 0.5.dp,
-                    y = (-44.5).dp
+                    y = (-32.5).dp
                 )
                 .requiredWidth(width = 329.dp)
-                .requiredHeight(height = 413.dp),
+                .requiredHeight(height = 425.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFFEFEFE)),
             elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
         ){}
@@ -274,7 +275,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     style = TextStyle(fontSize = 14.sp),
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
-                        .offset(x = 20.dp, y= (-2).dp)
+                        .offset(x = 20.dp, y = (-2).dp)
                         .padding(start = 19.dp)
                         .wrapContentHeight(align = Alignment.CenterVertically))
             }
@@ -316,6 +317,18 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     NavigationManager.instance!!.navigate("forgotPassword")
                 }
         )
+
+        Text(
+            text = "¿No tienes cuenta?",
+            color = Color(context.getColor(R.color.secondary)),
+            textAlign = TextAlign.Center,
+            style = TextStyle(fontSize = 11.sp),
+            modifier = Modifier.align(alignment = Alignment.TopCenter)
+                .offset(x = 3.5.dp, y = 550.dp)
+                .wrapContentHeight(align = Alignment.CenterVertically)
+                .clickable { NavigationManager.instance!!.navigate(AppScreens.Register.route) }
+        )
+
         //Texto de error
         Text(
             text = error,

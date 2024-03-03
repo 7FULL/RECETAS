@@ -114,53 +114,37 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                 Column{
                     Box(modifier = Modifier.fillMaxSize()
                     ){
-                        SearchBar(
-                            modifier = Modifier
-                                .padding(bottom = 5.dp, end = 20.dp)
-                                .width(300.dp)
-                                .align(alignment = Alignment.CenterEnd)
-                                .background(color = Color(context.getColor(R.color.primary))),
-                            query = searchBarText,
-                            onQueryChange = {
-                                vm.onSearchBarTextChanged(it)
-                            },
-                            onSearch = {
-                                searchBarActive = false
+                        if (!searchBarActive){
+                            SearchBar(
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp, end = 20.dp)
+                                    .width(300.dp)
+                                    .align(alignment = Alignment.CenterEnd)
+                                    .background(color = Color(context.getColor(R.color.primary))),
+                                query = searchBarText,
+                                onQueryChange = {
+                                    vm.onSearchBarTextChanged(it)
+                                },
+                                onSearch = {
+                                    searchBarActive = false
 
-                                vm.filterRecipes()
-                            },
-                            active = searchBarActive,
-                            onActiveChange = {
-                                searchBarActive = it
-                            },
-                            placeholder = { Text("Encontrar recetas...") },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            trailingIcon = {
-                                Icon(
-                                    Icons.Default.Mic,
-                                    contentDescription = "Microphone",
-                                    modifier = Modifier
-                                        .clickable { /* TODO: Maybe implement the function of the microphone */ }
-                                )
-                            },
-                        ) {
-                            if (auxRecipes != null){
-                                repeat(auxRecipes.size) { idx ->
-                                    val resultText = auxRecipes[idx].name    ?: "Esta factura no tiene nombre"
-                                    ListItem(
-                                        headlineContent = { Text(resultText) },
-                                        supportingContent = { Text(auxRecipes[idx].description) },
-                                        leadingContent = { Icon(Icons.Filled.AttachMoney, contentDescription = null) },
+                                    vm.filterRecipes()
+                                },
+                                active = searchBarActive,
+                                onActiveChange = {
+                                    searchBarActive = it
+                                },
+                                placeholder = { Text("Encontrar recetas...") },
+                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.Mic,
+                                        contentDescription = "Microphone",
                                         modifier = Modifier
-                                            .clickable {
-                                                searchBarActive = false
-
-                                                vm.onSearchBarTextChanged(resultText)
-                                            }
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .clickable { /* TODO: Maybe implement the function of the microphone */ }
                                     )
-                                }
+                                },
+                            ) {
                             }
                         }
                     }
@@ -172,6 +156,56 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
         }
     ) {
         innerPadding ->
+
+        if(searchBarActive){
+            SearchBar(
+                modifier = Modifier
+                    .background(color = Color(context.getColor(R.color.primary))),
+                query = searchBarText,
+                onQueryChange = {
+                    vm.onSearchBarTextChanged(it)
+                },
+                onSearch = {
+                    searchBarActive = false
+
+                    vm.filterRecipes()
+                },
+                active = searchBarActive,
+                onActiveChange = {
+                    searchBarActive = it
+                },
+                placeholder = { Text("Encontrar recetas...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.Mic,
+                        contentDescription = "Microphone",
+                        modifier = Modifier
+                            .clickable { /* TODO: Maybe implement the function of the microphone */ }
+                    )
+                },
+            ) {
+                if (auxRecipes != null){
+                    repeat(auxRecipes.size) { idx ->
+                        val resultText = auxRecipes[idx].name    ?: "Esta factura no tiene nombre"
+                        ListItem(
+                            headlineContent = { Text(resultText) },
+                            supportingContent = { Text(auxRecipes[idx].description) },
+                            leadingContent = { Icon(Icons.Filled.AttachMoney, contentDescription = null) },
+                            modifier = Modifier
+                                .clickable {
+                                    searchBarActive = false
+
+                                    vm.onSearchBarTextChanged(resultText)
+                                }
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .clickable { NavigationManager.instance?.navigate("recipe?id=${auxRecipes[idx]._id}") }
+                        )
+                    }
+                }
+            }
+        }
 
         Column(modifier = Modifier.padding(innerPadding)){
 

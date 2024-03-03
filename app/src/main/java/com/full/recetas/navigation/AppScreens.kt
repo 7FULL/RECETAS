@@ -12,4 +12,5 @@ sealed class AppScreens(val route: String) {
     object CreateRecipe : AppScreens("createRecipe")
     object Profile : AppScreens("profile")
     object UserProfile : AppScreens("userProfile")
+    object Register : AppScreens("register")
 }

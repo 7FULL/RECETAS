@@ -55,6 +55,8 @@ class LikesViewModel: ViewModel() {
 
     fun onSearchBarTextChanged(text: String){
         _searchBarText.value = text
+
+        filterRecipes()
     }
 
     fun filterRecipes(){

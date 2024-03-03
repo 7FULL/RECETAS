@@ -61,14 +61,12 @@ import com.full.recetas.network.API
 fun Recipe(vm: RecipeViewModel) {
     val context = LocalContext.current
     val recipe: Recipe by vm.recipeData.observeAsState(Recipe())
-    val likes = recipe.likes
 
     val isLikedLD: Boolean by vm.isLiked.observeAsState(false)
-
-    Log.i("Recipe", "isLiked: $isLikedLD")
+    val isFollowing: Boolean by vm.isFollowing.observeAsState(false)
 
     //If likes is greater than 1000, we divide it by 1000 and add a "K" at the end
-    val likesText = if (likes > 1000) "${likes / 1000}K" else likes.toString()
+    val likesText: String by vm.likesText.observeAsState("")
 
     Scaffold (
         topBar = {
@@ -208,8 +206,8 @@ fun Recipe(vm: RecipeViewModel) {
                                 )
                                 if(API.isLogged){
                                     //Suscribe button if the publisher followers list doesn't contain the current user
-                                    if (!recipe.publisher.followers.contains(API.User.value!!._id)){
-                                        Button(onClick = { /*TODO*/ },
+                                    if (!isFollowing){
+                                        Button(onClick = { vm.followUser(recipe.publisher._id) },
                                             modifier = Modifier
                                                 .padding(start = 10.dp)
                                                 .align(alignment = Alignment.CenterVertically),
@@ -226,7 +224,7 @@ fun Recipe(vm: RecipeViewModel) {
                                             )
                                         }
                                     }else{
-                                        Button(onClick = { /*TODO*/ },
+                                        Button(onClick = { vm.unfollowUser(recipe.publisher._id) },
                                             modifier = Modifier
                                                 .padding(start = 10.dp)
                                                 .align(alignment = Alignment.CenterVertically),

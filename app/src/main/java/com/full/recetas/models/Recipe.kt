@@ -10,6 +10,6 @@ data class Recipe(
     val description: String = "",
     val cookingInstructions: List<String> = listOf(),
     val ingredients: List<Ingredient> = listOf(),
-    val likes: Int = 0,
+    var likes: Int = 0,
     val tags: List<String> = listOf()
 )
