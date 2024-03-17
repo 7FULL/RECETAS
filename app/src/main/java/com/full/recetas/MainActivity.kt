@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -59,6 +60,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    MultiplePermissionExample()
                     NavigationManager.InitializeNavigator()
 
                     //Kalendar(currentDay = LocalDate(1,1,1), kalendarType = KalendarType.Oceanic)
@@ -188,6 +190,31 @@ fun LockScreenOrientation(orientation: Int) {
             // restore original orientation when view disappears
             activity.requestedOrientation = originalOrientation
         }
+    }
+}
+
+@Composable
+fun MultiplePermissionExample() {
+    // Create a permission request launcher
+    val requestPermissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                Log.d("PermissionRequest", "${it.key} = ${it.value}")
+            }
+        }
+
+    // Request permissions when the composable is first launched
+    DisposableEffect(Unit) {
+        requestPermissionLauncher.launch(
+            arrayOf(
+                android.Manifest.permission.CAMERA,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+                android.Manifest.permission.INTERNET,
+            )
+        )
+        onDispose {}
     }
 }
 

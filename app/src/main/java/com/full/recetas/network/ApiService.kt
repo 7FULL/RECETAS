@@ -60,9 +60,8 @@ interface ApiService {
     @GET("api/tags")
     suspend fun getTags(): Response<DataResponse<Array<Tag>>>
 
-    @Multipart
     @POST("api/recipe")
-    suspend fun createRecipe(@Part("recipe") recipe: Recipe, @Part photo: MultipartBody.Part, @Query("edit") isEdit: Boolean): Response<DataResponse<Recipe>>
+    suspend fun createRecipe(@Body recipe: Recipe, @Query("edit") isEdit: Boolean): Response<DataResponse<String>>
 
     // Recipes by userID
     @GET("api/recipes/user")

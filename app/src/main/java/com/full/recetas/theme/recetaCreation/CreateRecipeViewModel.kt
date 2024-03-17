@@ -19,6 +19,8 @@ import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
 import com.full.recetas.utils.SavePhotoToGalleryUseCase
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -59,8 +61,24 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
     private val _imageSRC = MutableLiveData<String>()
     val imageSRC: LiveData<String> = _imageSRC
 
+    private val _isEditing = MutableLiveData<Boolean>(false)
+    val isEditing: LiveData<Boolean> = _isEditing
+
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    val storage = Firebase.storage
+
     private var _id = ""
     init {
+        // We clear the fields
+        _recipeName.value = ""
+        _recipeDescription.value = ""
+        _recipeMinutes.value = ""
+        _selectedTags.value = listOf()
+        _ingredients.value = listOf()
+        _instructions.value = listOf()
+
         if (!API.isLogged){
             NavigationManager.instance!!.navigate(AppScreens.Login.route)
         }else{
@@ -79,6 +97,8 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
                 _instructions.value = recipe.cookingInstructions
 
                 _imageSRC.value = recipe.image
+
+                _isEditing.value = true
 
                 _id = recipe._id
             }
@@ -118,6 +138,14 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
         if(isValid()){
             val ingredientOptions = listOf("G", "KG", "ML", "L")
 
+            // If any ingredient is empty
+            for (i in _ingredients.value!!){
+                if(i.name.isEmpty() || i.quantity.isEmpty()){
+                    Toast.makeText(API.mainActivity, "Faltan campos por rellenar", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+
             // We add the selected quantity
             val ingredients = _ingredients.value?.toMutableList() ?: mutableListOf()
 
@@ -125,7 +153,7 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
                 ingredients[i] = ingredients[i].copy(quantity = ingredients[i].quantity + " " + ingredientOptions[selectedIndexes[i]])
             }
 
-            if (image == null && _imageSRC.value!!.isEmpty()){
+            if (image == null && _imageSRC.value?.isEmpty() != false){
                 Toast.makeText(API.mainActivity, "Falta la imagen", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -146,23 +174,38 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
             }
 
             viewModelScope.launch {
-                val stream = ByteArrayOutputStream()
+                _isLoading.value = true
 
-                image?.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
-                val byteArray = stream.toByteArray()
-
-                val requestFile = RequestBody.create(MediaType.parse("image/*"), byteArray)
-                val imagePart = MultipartBody.Part.createFormData("photo", "photo.png", requestFile)
-
-                val response = API.service.createRecipe(recipe, imagePart, recipeString.isNotEmpty())
+                val response = API.service.createRecipe(recipe, isEditing.value!!)
 
                 if(response.isSuccessful){
                     val data = response.body()!!
 
                     if(data.code == 200){
-                        Toast.makeText(API.mainActivity, if (_recipeName.value!!.isEmpty()) "Receta creada" else "Receta editada"  , Toast.LENGTH_SHORT).show()
-                        NavigationManager.instance!!.navigate(AppScreens.HomeLogged.route)
+                        // We put the image in the storage
+                        if (image != null){
+                            val stream = ByteArrayOutputStream()
+
+                            image?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+                            val byteArray = stream.toByteArray()
+
+
+                            val storageRef = storage.reference
+                            val imageRef = storageRef.child("images/${data.data!!}.png")
+
+                            imageRef.putBytes(byteArray).addOnSuccessListener {
+                                //_isLoading.value = false
+
+                                Toast.makeText(API.mainActivity, if (_isEditing.value == false) "Receta creada" else "Receta editada"  , Toast.LENGTH_SHORT).show()
+                                NavigationManager.instance!!.navigate(AppScreens.HomeLogged.route)
+                            }
+                        }else{
+                            //_isLoading.value = false
+
+                            Toast.makeText(API.mainActivity, if (_isEditing.value == false) "Receta creada" else "Receta editada"  , Toast.LENGTH_SHORT).show()
+                            NavigationManager.instance!!.navigate(AppScreens.HomeLogged.route)
+                        }
                     }else{
                         Toast.makeText(API.mainActivity, "Error creando receta", Toast.LENGTH_SHORT).show()
                     }
@@ -177,9 +220,12 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
 
     // Check if the recipe is valid
     fun isValid(): Boolean{
-        return recipeName.value!!.isNotEmpty()
-                && recipeDescription.value!!.isNotEmpty()
-                && recipeMinutes.value!!.isNotEmpty()
+        return recipeName.value?.isNotEmpty()?: false
+                && recipeDescription.value?.isNotEmpty()?: false
+                && recipeMinutes.value?.isNotEmpty()?: false
+                && selectedTags.value?.isNotEmpty()?: false
+                && ingredients.value?.isNotEmpty()?: false
+                && instructions.value?.isNotEmpty()?: false
     }
 
     // On change name
@@ -268,8 +314,6 @@ class CreateRecipeViewModel(private val savePhotoToGalleryUseCase: SavePhotoToGa
         list[index] = instruction
         _instructions.value = list
     }
-    
-    
 
     // Request Image from gallery
     fun requestImage(){

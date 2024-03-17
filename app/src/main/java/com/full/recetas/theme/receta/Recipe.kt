@@ -1,5 +1,6 @@
 package com.full.recetas.theme.receta
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,14 +40,17 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -55,6 +59,8 @@ import com.full.recetas.R
 import com.full.recetas.models.Recipe
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -67,6 +73,12 @@ fun Recipe(vm: RecipeViewModel) {
 
     //If likes is greater than 1000, we divide it by 1000 and add a "K" at the end
     val likesText: String by vm.likesText.observeAsState("")
+
+    val storage = Firebase.storage.reference
+
+    val image = MutableLiveData(Uri.EMPTY)
+
+    val loaded by vm.isLoaded.observeAsState(false)
 
     Scaffold (
         topBar = {
@@ -108,14 +120,29 @@ fun Recipe(vm: RecipeViewModel) {
 
         Column(modifier = Modifier.padding(innerPadding)){
             Box{
-                GlideImage(model = recipe.image,
-                    contentDescription = recipe.name,
-                    contentScale = ContentScale.Crop,
-                    loading = placeholder(R.drawable.loading),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                )
+
+                if (recipe.image.isNotEmpty()){
+                    storage.child("images/${recipe.image}").downloadUrl.addOnSuccessListener {
+                        image.value = it
+
+                        vm.changeLoaded()
+                    }.addOnFailureListener {
+                        Log.i("RecipeViewModel", "Error downloading image: ${it}")
+                    }
+
+                    //We use glide to load the image from the firebase storage using the name (recipe.image)
+                    if(loaded){
+                        GlideImage(model = image.value,
+                            contentDescription = recipe.name,
+                            contentScale = ContentScale.Crop,
+                            loading = placeholder(R.drawable.loading),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .rotate(180f)
+                        )
+                    }
+                }
 
                 if (API.isLogged){
                     Box(

@@ -280,8 +280,30 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                         .wrapContentHeight(align = Alignment.CenterVertically))
             }
         }
+        Button(
+            modifier = Modifier
+                .align(alignment = Alignment.TopStart)
+                .padding(
+                    start = 50.dp,
+                    top = 600.dp
+                )
+                .requiredWidth(width = 263.dp)
+                .requiredHeight(height = 47.dp),
+            shape = RoundedCornerShape(5.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(context.getColor(R.color.primaryDescendant)),
+                contentColor = Color.White,
+            ),
+            onClick = {
+                NavigationManager.instance!!.navigate(AppScreens.HomeNoLogged.route)
+            }
+        ) {
+            Text(text = "Entrar como invitado")
+        }
+
         //TODO: Remember to remove it when the app is in production
         Button(
+            modifier = Modifier.padding(top = 50.dp),
             onClick = {
                 loginViewModel.onLoginChanged("admin", "678041577")
                 loginViewModel.login()
@@ -337,7 +359,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
             fontSize = 24.sp,
             modifier = Modifier
                 .align(alignment = Alignment.TopCenter)
-                .offset(y = 575.dp)
+                .offset(y = 650.dp)
                 .wrapContentHeight(align = Alignment.CenterVertically)
         )
         Box(

@@ -1,5 +1,6 @@
 package com.full.recetas.theme.receta
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
@@ -12,6 +13,9 @@ import com.full.recetas.models.Recipe
 import com.full.recetas.models.User
 import com.full.recetas.network.API
 import com.full.recetas.network.DataResponse
+import com.google.firebase.Firebase
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.launch
 
 class RecipeViewModel(id: String): ViewModel(){
@@ -27,6 +31,12 @@ class RecipeViewModel(id: String): ViewModel(){
 
     private val _likesText = MutableLiveData<String>()
     val likesText: LiveData<String> = _likesText
+
+    private val _image = MutableLiveData<Uri>(Uri.EMPTY)
+    val image: LiveData<Uri> = _image
+
+    private val loaded = MutableLiveData<Boolean>(false)
+    val isLoaded: LiveData<Boolean> = loaded
 
     init {
         getrecipe(id, true)
@@ -72,7 +82,6 @@ class RecipeViewModel(id: String): ViewModel(){
                         publisher = User(
                             _id = "0",
                             name = "Error",
-                            phone = "Error",
                             surname = "Error",
                             email = "Error",
                             password = "Error",
@@ -213,6 +222,10 @@ class RecipeViewModel(id: String): ViewModel(){
                 Log.i("RecipeViewModel", "Error unfollowing user: ${response.code()} ${response.message()}")
             }
         }
+    }
+
+    fun changeLoaded(){
+        loaded.value = true
     }
 }
 

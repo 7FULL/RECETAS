@@ -72,7 +72,6 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
     val name: String by vm.name.observeAsState(initial = "")
     val surname: String by vm.surname.observeAsState(initial = "")
     val email: String by vm.email.observeAsState(initial = "")
-    val phone: String by vm.phone.observeAsState(initial = "")
     val error: String by vm.error.observeAsState(initial = "")
     val confirmPassword : String by vm.confirmPassword.observeAsState(initial = "")
     
@@ -155,7 +154,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     label = "Nomre de usuario",
                     placeholder = "Escribe tu usuario o correo",
                     value = username,
-                    onInputChanged = { vm.onRegisterChanged(username = it, password = password, name = name, surname = surname, email = email, phone = phone, confirmPassword = confirmPassword) }
+                    onInputChanged = { vm.onRegisterChanged(username = it, password = password, name = name, surname = surname, email = email, confirmPassword = confirmPassword) }
                 )
             }
 
@@ -169,7 +168,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     placeholder = "●●●●●●●",
                     type = KeyboardType.Password,
                     value = password,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = it, name = name, surname = surname, email = email, phone = phone, confirmPassword = confirmPassword) }
+                    onInputChanged = { vm.onRegisterChanged(username = username, password = it, name = name, surname = surname, email = email, confirmPassword = confirmPassword) }
                 )
             }
 
@@ -183,7 +182,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     placeholder = "●●●●●●●",
                     type = KeyboardType.Password,
                     value = confirmPassword,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = surname, email = email, phone = phone, confirmPassword = it) }
+                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = surname, email = email, confirmPassword = it) }
                 )
             }
 
@@ -196,7 +195,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     label = "Nombre",
                     placeholder = "Escribe tu nombre",
                     value = name,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = it, surname = surname, email = email, phone = phone, confirmPassword = confirmPassword) }
+                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = it, surname = surname, email = email, confirmPassword = confirmPassword) }
                 )
             }
 
@@ -209,7 +208,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     label = "Apellido",
                     placeholder = "Escribe tu apellido",
                     value = surname,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = it, email = email, phone = phone, confirmPassword = confirmPassword) }
+                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = it, email = email, confirmPassword = confirmPassword) }
                 )
             }
 
@@ -222,20 +221,7 @@ fun Body(modifier: Modifier = Modifier, vm: RegisterViewModel) {
                     label = "Correo",
                     placeholder = "Escribe tu correo",
                     value = email,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = surname, email = it, phone = phone, confirmPassword = confirmPassword) }
-                )
-            }
-
-            item{
-                Input(
-                    modifier = Modifier
-                        .align(alignment = Alignment.TopStart)
-                        .requiredWidth(width = 265.dp)
-                        .requiredHeight(height = 75.dp),
-                    label = "Telefono",
-                    placeholder = "Escribe tu telefono",
-                    value = phone,
-                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = surname, email = email, phone = it, confirmPassword = confirmPassword) }
+                    onInputChanged = { vm.onRegisterChanged(username = username, password = password, name = name, surname = surname, email = it, confirmPassword = confirmPassword) }
                 )
             }
 

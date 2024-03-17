@@ -73,10 +73,6 @@ object NavigationManager{
                         navArgument("id") { type = NavType.StringType }
                     )
                 ) {
-
-                Log.i("Recipe", "Recipe route: ${it.arguments?.getString("id")}")
-                Log.i("Recipe", "Recipe route: ${it.arguments?.getBoolean("isLiked")}")
-
                 Recipe(vm = RecipeViewModel(id = it.arguments?.getString("id") ?: ""))
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }

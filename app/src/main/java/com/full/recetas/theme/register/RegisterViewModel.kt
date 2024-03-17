@@ -29,9 +29,6 @@ class RegisterViewModel: ViewModel() {
     private val _email = MutableLiveData<String>()
     val email : LiveData<String> = _email
 
-    private val _phone = MutableLiveData<String>()
-    val phone : LiveData<String> = _phone
-
     private val _error = MutableLiveData<String>()
     val error : LiveData<String> = _error
 
@@ -41,7 +38,7 @@ class RegisterViewModel: ViewModel() {
     private val _enableLogin = MutableLiveData<Boolean>()
     val enableLogin : LiveData<Boolean> = _enableLogin
 
-    fun onRegisterChanged(username: String, password: String, name: String, surname: String, email: String, phone: String, confirmPassword: String) {
+    fun onRegisterChanged(username: String, password: String, name: String, surname: String, email: String, confirmPassword: String) {
         _username.value = username
         if (password.length < 11) {
             _password.value = password
@@ -50,14 +47,13 @@ class RegisterViewModel: ViewModel() {
         _name.value = name
         _surname.value = surname
         _email.value = email
-        _phone.value = phone
         _confirmPassword.value = confirmPassword
 
-        _enableLogin.value = username.isNotEmpty() && password.isNotEmpty() && password.length >= 8 && !_isLoading.value!! && name.isNotEmpty() && surname.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty() && password == _confirmPassword.value
+        _enableLogin.value = username.isNotEmpty() && password.isNotEmpty() && password.length >= 8 && !_isLoading.value!! && name.isNotEmpty() && surname.isNotEmpty() && email.isNotEmpty() && password == _confirmPassword.value
     }
 
     fun register() {
-        val client = User(name = _name.value!!, surname = _surname.value!!, image = "https://cdn.icon-icons.com/icons2/1508/PNG/512/systemusers_104569.png"  ,email = _email.value!!, phone = _phone.value!!, username = _username.value!!, password = _password.value!!)
+        val client = User(name = _name.value!!, surname = _surname.value!!, image = "https://cdn.icon-icons.com/icons2/1508/PNG/512/systemusers_104569.png"  ,email = _email.value!!, username = _username.value!!, password = _password.value!!)
 
         viewModelScope.launch {
             _isLoading.value = true
@@ -68,9 +64,13 @@ class RegisterViewModel: ViewModel() {
                 if (result.body()!!.code == 200) {
                     _error.value = "Usuario registrado correctamente"
 
-                    API.setUser(client)
+                    //TODO: Tenemos que hacer que devuelva la ip el back para que podamos hacer el login
 
-                    NavigationManager.instance!!.navigate(AppScreens.HomeLogged.route)
+                    //API.setUser(client)
+
+                    //NavigationManager.instance!!.navigate(AppScreens.HomeLogged.route)
+
+                    NavigationManager.instance!!.navigate(AppScreens.Login.route)
                 }
             } else {
                 _error.value = "Error al registrar el usuario"

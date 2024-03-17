@@ -38,7 +38,7 @@ class LoginViewModel: ViewModel() {
     private val _checkRememberMe = MutableLiveData<Boolean>(false)
     val checkRememberMe : LiveData<Boolean> = _checkRememberMe
 
-    /*
+
     init {
         //TODO: Podria hacerse que tuviese que confirmase el inicio de sesion con huella dactilar
         if(!API.isLogged){
@@ -48,31 +48,16 @@ class LoginViewModel: ViewModel() {
             val password = sharedPreferences.getString("password", "")
 
             if (email != null && password != null && email.isNotEmpty() && password.isNotEmpty()) {
-                _username.value = email
-                _password.value = password
+                _username.value = email!!
+                _password.value = password!!
                 _checkRememberMe.value = true
 
-                viewModelScope.launch {
-                    var result = API.service.getUser(email!!)
+                _enableLogin.value = true
 
-                    if (result.isSuccessful) {
-                        val data: DataResponse<User> = result.body()!!
-
-                        if (data.code == 200) {
-                            API.setUser(data.data!!)
-                            NavigationManager.instance?.navigate(AppScreens.HomeLogged.route)
-                        }
-                        else if (data.code == 401) {
-                            _error.value = "Usuario no reconocido"
-                        }
-                    } else {
-                        Log.i("CRM", "Error en el login con google")
-                        Log.i("CRM", result.toString())
-                    }
-                }
+                login()
             }
         }
-    }*/
+    }
 
     fun signInWithGoogle(credential: AuthCredential) {
         viewModelScope.launch {

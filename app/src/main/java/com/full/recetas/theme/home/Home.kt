@@ -1,5 +1,6 @@
 package com.full.recetas.theme.home
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -62,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -72,6 +76,8 @@ import com.full.recetas.models.Tag
 import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class,
     ExperimentalGlideComposeApi::class
@@ -88,7 +94,6 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
     val context = LocalContext.current
 
     val isLoading by vm.isLoading.observeAsState()
-
     Scaffold (
         topBar = {
             Box(
@@ -153,6 +158,60 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
         },
         bottomBar = {
             BottomBar(selectedIcon = -1)
+            if(!loggedIn){
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .offset(y = (-32).dp)
+                    .background(color = Color(context.getColor(R.color.secondary)))
+                ){
+                    Row(modifier = Modifier.align(Alignment.Center)){
+                        Column{
+                            Box(modifier = Modifier.fillMaxHeight()){
+                                Text(
+                                    text = "¿Todavia no tienes cuenta? Unete!",
+                                    style = TextStyle(
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        textAlign = TextAlign.Center
+                                    ),
+                                    color = Color.White,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                        Column{
+                            Box(modifier = Modifier
+                                .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
+                                .clickable { NavigationManager.instance?.navigate(AppScreens.Login.route) }
+                            ){
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color.White,
+                                            shape = RoundedCornerShape(5.dp)
+                                        )
+                                        .height(22.dp)
+                                )
+                                {
+                                    Text(
+                                        text = "Iniciar sesion",
+                                        color = Color(context.getColor(R.color.secondary)),
+                                        style = TextStyle(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            textAlign = TextAlign.Center
+                                        ),
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(start = 5.dp, end = 5.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     ) {
         innerPadding ->
@@ -207,33 +266,38 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
             }
         }
 
-        Column(modifier = Modifier.padding(innerPadding)){
-
-            //Titulo recetas de la semamna
-            Row {
-                Text(text = "Recetas destacadas",
-                    modifier = Modifier.padding(start = 15.dp, top = 5.dp),
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+        if (isLoading!!){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White)
+            ){
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
+        }
 
-            if(isLoading!!){
-                GlideImage(model = R.drawable.loading,
-                    contentDescription = "Loading",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                )
-            }else{
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()){
+            if(!isLoading!!){
+                //Titulo recetas de la semamna
+                Row {
+                    Text(text = "Recetas destacadas",
+                        modifier = Modifier.padding(start = 15.dp, top = 5.dp),
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
                 //Recetas de la semana
                 Row {
                     LazyRow(modifier = Modifier.padding(
                         start= 11.dp, top= 20.dp, bottom = 20.dp)){
                         for (receta in trendingRecipes){
+                            val image = MutableLiveData(Uri.EMPTY)
+
                             item{
                                 var isLiked = false
 
@@ -253,13 +317,13 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                             .background(color = Color(context.getColor(R.color.unselected)))
                                     ) {
                                         Row{
-                                            Log.i("Home", "Image: ${receta.image}")
-                                            GlideImage(model = receta.image,
+                                            GlideImage(model = vm.getTrendingImage(receta._id),
                                                 contentDescription = "Recipe",
                                                 contentScale = ContentScale.Crop,
                                                 loading = placeholder(R.drawable.loading),
                                                 modifier = Modifier
                                                     .height(74.dp)
+                                                    .rotate(180f)
                                             )
                                         }
                                         Row(modifier = Modifier.fillMaxSize()){
@@ -316,9 +380,9 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                 Row{
                     LazyColumn(modifier = Modifier
                         .padding(
-                            start = 11.dp, end = 11.dp
+                            start = 11.dp, end = 11.dp, bottom = if (loggedIn) 0.dp else 32.dp
                         )
-                        .height(if (!loggedIn) 402.dp else 450.dp)
+                        .fillMaxHeight()
                     ){
                         for (receta in auxRecipes){
                             item{
@@ -348,7 +412,8 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                         )
                                                     )
                                                     .background(color = Color(context.getColor(R.color.primary)))){
-                                                GlideImage(model = receta.image,
+
+                                                GlideImage(model = vm.getImage(receta._id),
                                                     contentDescription = "Recipe",
                                                     contentScale = ContentScale.Crop,
                                                     loading = placeholder(R.drawable.loading),
@@ -361,7 +426,9 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                             )
                                                         )
                                                         .background(color = Color(context.getColor(R.color.primary)))
+                                                        .rotate(180f)
                                                 )
+
                                                 if (API.isLogged){
                                                     if (isLiked) {
                                                         Icon(
@@ -470,63 +537,6 @@ fun Home(modifier: Modifier = Modifier, vm: HomeViewModel, loggedIn: Boolean = f
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Mensaje de login
-                if(!loggedIn){
-                    Row{
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp)
-                            .background(color = Color(context.getColor(R.color.secondary)))
-                        ){
-                            Row(modifier = Modifier.align(Alignment.Center)){
-                                Column{
-                                    Box(modifier = Modifier.fillMaxHeight()){
-                                        Text(
-                                            text = "¿Todavia no tienes cuenta? Unete!",
-                                            style = TextStyle(
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                textAlign = TextAlign.Center
-                                            ),
-                                            color = Color.White,
-                                            modifier = Modifier.align(Alignment.Center)
-                                        )
-                                    }
-                                }
-                                Column{
-                                    Box(modifier = Modifier
-                                        .padding(start = 15.dp, top = 5.dp, bottom = 5.dp)
-                                        .clickable { NavigationManager.instance?.navigate(AppScreens.Login.route) }
-                                    ){
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = Color.White,
-                                                    shape = RoundedCornerShape(5.dp)
-                                                )
-                                                .height(22.dp)
-                                        )
-                                        {
-                                            Text(
-                                                text = "Iniciar sesion",
-                                                color = Color(context.getColor(R.color.secondary)),
-                                                style = TextStyle(
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    textAlign = TextAlign.Center
-                                                ),
-                                                modifier = Modifier
-                                                    .align(Alignment.Center)
-                                                    .padding(start = 5.dp, end = 5.dp)
-                                            )
                                         }
                                     }
                                 }

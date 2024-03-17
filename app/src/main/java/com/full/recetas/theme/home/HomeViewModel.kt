@@ -1,5 +1,6 @@
 package com.full.recetas.theme.home
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,6 +10,8 @@ import com.full.recetas.models.Recipe
 import com.full.recetas.models.Tag
 import com.full.recetas.network.API
 import com.full.recetas.network.DataResponse
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.launch
 
 class HomeViewModel: ViewModel() {
@@ -32,30 +35,19 @@ class HomeViewModel: ViewModel() {
     private val _tags = MutableLiveData<Array<Tag>>(emptyArray())
     val tags: LiveData<Array<Tag>> = _tags
 
+    //List of loaded images with live data
+    private val _loadedImages: MutableList<Uri> = mutableListOf()
+
+    private val _loadedTrendingImages: MutableList<Uri> = mutableListOf()
+
+    val storage = Firebase.storage.reference
+
     //This function is called when the component is created
     init {
         load()
     }
 
     fun load() {
-        viewModelScope.launch {
-            val result = API.service.getTrendingRecipes()
-
-            if (result.isSuccessful) {
-                val data: DataResponse<Array<Recipe>> = result.body()!!
-
-                if (data.code == 200) {
-                    API.setTrendingRecipes(data.data!!)
-
-                    _trendingRecipes.value = data.data
-                } else {
-                    Log.e("HomeViewModel", "Error getting trending recipes: ${data.code}")
-                }
-            } else {
-                Log.e("HomeViewModel", "Error getting trending recipes: ${result.code()}")
-            }
-        }
-
         viewModelScope.launch {
             val result = API.service.getRecipes()
 
@@ -68,7 +60,55 @@ class HomeViewModel: ViewModel() {
                     _recipes.value = data.data
                     _auxRecipes.value = data.data!!.toMutableList()
 
-                    _isLoading.value = false
+                    //We get the trending recipes
+                    val result2 = API.service.getTrendingRecipes()
+
+                    if (result2.isSuccessful) {
+                        val data2: DataResponse<Array<Recipe>> = result2.body()!!
+
+                        if (data2.code == 200) {
+                            API.setTrendingRecipes(data2.data!!)
+
+                            _trendingRecipes.value = data2.data
+
+                            var countOfImages = 0
+                            var countOfTrendingImages = 0
+
+                            for (recipe in _recipes.value!!) {
+                                val imageRef = storage.child("images/${recipe._id}.png")
+
+                                imageRef.downloadUrl.addOnSuccessListener {
+                                    _loadedImages.add(it)
+                                    countOfImages++
+
+                                    if(countOfImages == _recipes.value!!.size && countOfTrendingImages == _trendingRecipes.value!!.size){
+                                        _isLoading.value = false
+                                    }
+                                }.addOnFailureListener {
+                                    Log.e("HomeViewModel", "Error getting image: ${it.message}")
+                                }
+                            }
+
+                            for (recipe in _trendingRecipes.value!!) {
+                                val imageRef = storage.child("images/${recipe._id}.png")
+
+                                imageRef.downloadUrl.addOnSuccessListener {
+                                    _loadedTrendingImages.add(it)
+                                    countOfTrendingImages++
+
+                                    if(countOfImages == _recipes.value!!.size && countOfTrendingImages == _trendingRecipes.value!!.size){
+                                        _isLoading.value = false
+                                    }
+                                }.addOnFailureListener {
+                                    Log.e("HomeViewModel", "Error getting image: ${it.message}")
+                                }
+                            }
+                        } else {
+                            Log.e("HomeViewModel", "Error getting trending recipes: ${data.code}")
+                        }
+                    } else {
+                        Log.e("HomeViewModel", "Error getting trending recipes: ${result.code()}")
+                    }
                 } else {
                     Log.e("HomeViewModel", "Error getting trending recipes: ${data.code}")
                 }
@@ -159,5 +199,33 @@ class HomeViewModel: ViewModel() {
         API.User.value!!.likes.remove(id)
 
         load()
+    }
+
+    fun getImage(id: String): Uri {
+        //We check if any uri contains the id
+        var uri = Uri.EMPTY
+
+        for (i in _loadedImages){
+            if(i.toString().contains(id)){
+                uri = i
+                break
+            }
+        }
+
+        return uri
+    }
+
+    fun getTrendingImage(id: String): Uri {
+        //We check if any uri contains the id
+        var uri = Uri.EMPTY
+
+        for (i in _loadedTrendingImages){
+            if(i.toString().contains(id)){
+                uri = i
+                break
+            }
+        }
+
+        return uri
     }
 }

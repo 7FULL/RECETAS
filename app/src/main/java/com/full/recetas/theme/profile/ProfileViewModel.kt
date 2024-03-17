@@ -11,6 +11,8 @@ import com.full.recetas.models.User
 import com.full.recetas.navigation.AppScreens
 import com.full.recetas.navigation.NavigationManager
 import com.full.recetas.network.API
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.launch
 
 class ProfileViewModel: ViewModel() {
@@ -20,6 +22,8 @@ class ProfileViewModel: ViewModel() {
 
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
+
+    val storage = Firebase.storage.reference
 
     init {
         if (!API.isLogged){
@@ -41,7 +45,13 @@ class ProfileViewModel: ViewModel() {
                 val data = response.body()!!
 
                 if(data.code == 200){
-                    _recipes.value = _recipes.value!!.filter { it._id != recipe._id }
+
+                    val imageRef = storage.child("images/${recipe._id}.png")
+                    imageRef.delete().addOnSuccessListener {
+                        _recipes.value = _recipes.value!!.filter { it._id != recipe._id }
+                    }.addOnFailureListener {
+                        Toast.makeText(API.mainActivity, "Error eliminando la receta", Toast.LENGTH_SHORT).show()
+                    }
                 }else{
                     Toast.makeText(API.mainActivity, "Error eliminando la receta", Toast.LENGTH_SHORT).show()
                 }

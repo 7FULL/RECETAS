@@ -7,7 +7,6 @@ data class User(
     var name: String = "",
     var surname: String = "",
     var email: String = "",
-    var phone: String = "",
     var image: String = "",
     var likes: ArrayList<String> = arrayListOf(),
     var recipes: List<String> = listOf(),

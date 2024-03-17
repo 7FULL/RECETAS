@@ -81,6 +81,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    //Storage
+    implementation("com.google.firebase:firebase-storage")
+
     //Para el manejo de los estados
     implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
 
