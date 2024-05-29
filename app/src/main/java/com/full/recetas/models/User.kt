@@ -13,5 +13,4 @@ data class User(
     var following: ArrayList<String> = arrayListOf(),
     var followers: ArrayList<String> = arrayListOf(),
     var token: String = ""
-){
-}
+)
